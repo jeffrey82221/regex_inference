@@ -1,8 +1,8 @@
 from random_regex import RegexGenerator
 from regex_inference import Engine
 import exrex
-SHOW_PRECISION = False
-regex_gen = RegexGenerator(max_complexity=100, bloom_max_item_count=1000)
+SHOW_PRECISION = True
+regex_gen = RegexGenerator(max_complexity=30, bloom_max_item_count=1000)
 engine = Engine(verbose=False, simpify_regex=True)
 regex_instance = next(regex_gen.generate())
 regex_target = regex_instance['regex']
