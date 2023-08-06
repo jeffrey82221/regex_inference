@@ -8,10 +8,6 @@ jobs:
   run-shell-command:
     runs-on: ubuntu-latest
     steps:
-      - name: Test Environment
-        run: python -c 'import os;print(os.environ["OPENAI_API_KEY"])'
-        env: 
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
@@ -26,12 +22,12 @@ jobs:
         run: |
          pip install flake8
          flake8 --ignore=E501,W504
-      - name: Insert OpenAI API KEY
-        run: export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
       - name: run tests
         run: | 
           pip install pytest
           pytest
+        env: 
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       - name: check version
         run: |
           pip install requests
