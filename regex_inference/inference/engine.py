@@ -38,12 +38,16 @@ class Engine:
         self._max_iteration = max_iteration
         self._simpify_regex = simpify_regex
         if verbose:
-            self.run = make_verbose(self.run)
-            self.filter_mismatch = make_verbose(self.filter_mismatch)
-            self._run = make_verbose(self._run)
-            self._run_simplify_regex = make_verbose(self._run_simplify_regex)
-            self._run_alter_regex = make_verbose(self._run_alter_regex)
-            self._run_new_inference = make_verbose(self._run_new_inference)
+            self.run = make_verbose(self.run)  # type: ignore
+            self.filter_mismatch = make_verbose(
+                self.filter_mismatch)  # type: ignore
+            self._run = make_verbose(self._run)  # type: ignore
+            self._run_simplify_regex = make_verbose(
+                self._run_simplify_regex)  # type: ignore
+            self._run_alter_regex = make_verbose(
+                self._run_alter_regex)  # type: ignore
+            self._run_new_inference = make_verbose(
+                self._run_new_inference)  # type: ignore
         self._setup_lang_chains()
 
     def run(self, patterns: List[str], regex: Optional[str] = None) -> str:
