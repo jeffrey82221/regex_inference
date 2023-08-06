@@ -50,7 +50,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
 
     ],
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     tests_require=['pytest'],
     install_requires=[
         'openapi-schema-pydantic==1.2.4',
