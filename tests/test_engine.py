@@ -254,7 +254,10 @@ def patterns_with_empty_string():
         "",
         "123",
         "apple",
-        ""
+        "",
+        "@",
+        "中華文化",
+        "   "
     ]
 
 

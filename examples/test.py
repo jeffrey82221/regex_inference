@@ -239,3 +239,4 @@ if __name__ == '__main__':
     end = time.time()
     print('run time =', end - start)
     print(regex)
+    e.explain(regex)
