@@ -53,13 +53,9 @@ setuptools.setup(
     python_requires='>=3.7',
     tests_require=['pytest'],
     install_requires=[
-        'openai',
-        'langchain'
-    ],
-    entry_points={
-        'console_scripts': [
-            'regex-inference = \
-        regex_inference.cmd.inference:run',
-        ]
-    }
+        'openapi-schema-pydantic==1.2.4',
+        'pydantic==1.10.12',
+        'openai==0.27.8',
+        'langchain==0.0.253'
+    ]
 )
