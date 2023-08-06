@@ -7,8 +7,8 @@ import os
 
 
 class Engine:
-    def __init__(self, openai_api_key: Optional[str] = None, temparature: int = 0.8,
-                 mismatch_tolerance: int = 0.1, max_iteration: int = 3):
+    def __init__(self, openai_api_key: Optional[str] = None, temparature: float = 0.8,
+                 mismatch_tolerance: float = 0.1, max_iteration: int = 3):
         if openai_api_key is None:
             openai_api_key = os.environ["OPENAI_API_KEY"]
         self._openai_llm = OpenAI(
