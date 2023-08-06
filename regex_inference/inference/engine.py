@@ -13,7 +13,8 @@ class Engine:
             openai_api_key = os.environ["OPENAI_API_KEY"]
         self._openai_llm = OpenAI(
             openai_api_key=openai_api_key,
-            temperature=temparature
+            temperature=temparature,
+            model='text-davinci-003' # https://platform.openai.com/docs/models/gpt-3-5
         )
         self._mismatch_tolerance = mismatch_tolerance
         self._max_iteration = max_iteration
