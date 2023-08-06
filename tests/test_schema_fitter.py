@@ -1,6 +1,6 @@
-from jsonschema_inference.schema.objs import Record, Array, Atomic, Optional, Union, UniformRecord, Unknown
-from jsonschema_inference import fit
-import jsonschema_inference
+from regex_inference.schema.objs import Record, Array, Atomic, Optional, Union, UniformRecord, Unknown
+from regex_inference import fit
+import regex_inference
 
 
 def test_fit():
@@ -29,7 +29,7 @@ def test_unify_records():
 
 
 def test_no_unify_records():
-    jsonschema_inference.init(unify_records=False)
+    regex_inference.init(unify_records=False)
     assert fit({'1': 1, '2': 2}) == Record(
         {'1': Atomic(int), '2': Atomic(int)})
     assert fit(

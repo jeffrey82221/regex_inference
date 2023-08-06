@@ -1,9 +1,9 @@
 import pytest
 import copy
 from collections import Counter
-from jsonschema_inference.schema.objs import Atomic, Array, Record, Union, Optional, UniformRecord, Unknown, DynamicRecord
-from jsonschema_inference.schema.inference.reduce import reduce_schema
-import jsonschema_inference
+from regex_inference.schema.objs import Atomic, Array, Record, Union, Optional, UniformRecord, Unknown, DynamicRecord
+from regex_inference.schema.inference.reduce import reduce_schema
+import regex_inference
 
 
 @pytest.fixture()
@@ -165,7 +165,7 @@ def test_set(simple_int, simple_float, simple_none,
                                   'b': Atomic(float)})]) == Optional(DynamicRecord({'a': Atomic(int),
                                                                                     'b': Atomic(float)}, Counter({'a': 2, 'b': 1})))
     # assert of equavilence_model = label
-    jsonschema_inference.init(equivalence_mode='label')
+    regex_inference.init(equivalence_mode='label')
     assert reduce_schema([Record({'a': Atomic(int)}), Record({'a': Atomic(int), 'b': Atomic(
         float)})]) == Union({Record({'a': Atomic(int)}), Record({'a': Atomic(int), 'b': Atomic(float)})})
 
