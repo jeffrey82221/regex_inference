@@ -244,3 +244,30 @@ def test_run(patterns):
     for pattern in patterns:
         check = re_com.fullmatch(pattern)
         assert check is not None, f'{pattern} does not fullmatch {regex}'
+
+
+@pytest.fixture
+def patterns_with_empty_string():
+    return [
+        "0",
+        "9",
+        "",
+        "123",
+        "apple",
+        ""
+    ]
+
+
+def test_run_with_empty_string(patterns_with_empty_string):
+    e = Engine()
+    regex = e.run(patterns_with_empty_string)
+    re_com = re.compile(regex)
+    for pattern in patterns_with_empty_string:
+        check = re_com.fullmatch(pattern)
+        assert check is not None, f'{pattern} does not fullmatch {regex}'
+
+
+def test_emply_input():
+    e = Engine()
+    with pytest.raises(AssertionError):
+        e.run([])

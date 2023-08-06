@@ -22,6 +22,8 @@ class Engine:
         self._setup_lang_chains()
 
     def run(self, patterns: List[str], regex: Optional[str] = None) -> str:
+        assert len(
+            patterns) > 0, '`patterns` input to `run` should no be an empty list'
         if regex is None:
             regex = self._run(patterns)
         regex = self._run_simplify_regex(regex, patterns)
@@ -40,11 +42,16 @@ class Engine:
             regex_result = self._run_new_inference(patterns)
         return regex_result
 
+    @staticmethod
+    def _convert_patterns_to_prompt(patterns: List[str]) -> str:
+        return '\n'.join(map(lambda x: f'"{x}"', patterns))
+
     def _run_alter_regex(self, regex: str, patterns: List[str]) -> str:
         for _ in range(self._max_iteration):
             result = self._regex_alter_chain.run(
                 regex=regex,
-                strings='\n'.join(patterns)).strip()
+                strings=Engine._convert_patterns_to_prompt(patterns)
+            ).strip()
             try:
                 re.compile(result)
                 break
@@ -56,7 +63,8 @@ class Engine:
         for _ in range(self._max_iteration):
             result = self._regex_simplify_chain.run(
                 regex=regex,
-                strings='\n'.join(patterns)).strip()
+                strings=Engine._convert_patterns_to_prompt(patterns)
+            ).strip()
             try:
                 re.compile(result)
                 break
@@ -66,7 +74,9 @@ class Engine:
 
     def _run_new_inference(self, patterns: List[str]) -> str:
         for _ in range(self._max_iteration):
-            result = self._new_inference_chain.run('\n'.join(patterns)).strip()
+            result = self._new_inference_chain.run(
+                Engine._convert_patterns_to_prompt(patterns)
+            ).strip()
             try:
                 re.compile(result)
                 break
@@ -97,7 +107,7 @@ class Engine:
             prompt=self.simplify_regex_prompt,
             llm=self._openai_llm
         )
-    
+
     @property
     def new_inference_prompt(self) -> PromptTemplate:
         template = """Question: Show me the best and shortest regex that can fully match the strings that I provide to you.
@@ -107,10 +117,13 @@ Note that:
 *. The character count of the resulting regex should not be larger than 30.
 *. Use \\d to replace [0-9].
 *. Try to focus more on the global pattern rather than the local patterns.
-Now, the patterns should be fully matched is provided line-by-line as follows:
+Now, each instance of the strings that should be fully matched is provided line-by-line and wrapped by double quotes as follows:
 {strings}
 
-Note: Provide the resulting regex without wrapping it in quote
+Note that:
+1. The double quote is not part of the string instance. Ignore the double quote during inferencing the regex.
+2. Provide the resulting regex without wrapping it in quote
+
 The resulting regex is: """
         prompt = PromptTemplate(
             template=template,
@@ -125,10 +138,13 @@ The resulting regex is: """
 *. The strings that I provide to you also fully match.
 *. The character count of the resulting regex should not be larger than 30.
 *. The regex should be made more generalized (e.g., use \\d to represent digit rather than using [0-9]) and shorter than the original regex.
-Each string of the strings is provided line-by-line as follows:
+Now, each instance of the strings is provided line-by-line and wrapped by double quotes as follows:
 {strings}
 
-Note: Provide the resulting regex without wrapping it in quote
+Note that:
+1. The double quote is not part of the string instance. Ignore the double quote during inferencing the regex.
+2. Provide the resulting regex without wrapping it in quote
+
 The resulting altered regex is: """
         prompt = PromptTemplate(
             template=template,
@@ -143,11 +159,15 @@ Please revise the regex "{regex}"
 such that
 *. It becomes as short as possible.
 *. It still fully match all the strings full matched the original regex
-*. It still fully match each of the following strings:
-
+*. It still fully match each of the strings I provided to you.
+Now, each instance of the strings is provided line-by-line and wrapped by double quotes as follows:
 {strings}
 
-Note: Provide the resulting regex without wrapping it in quote
+
+Note that:
+1. The double quote is not part of the string instance. Ignore the double quote during inferencing the regex.
+2. Provide the resulting regex without wrapping it in quote
+
 The resulting revise regex is:
 """
         prompt = PromptTemplate(
