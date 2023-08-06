@@ -5,6 +5,7 @@ from typing import List, Optional
 import re
 import os
 
+
 def make_verbose(func):
     def warp(*args, **kwargs):
         args_str = str(args)
@@ -13,15 +14,18 @@ def make_verbose(func):
             args_str = args_str[:10] + '...' + args_str[-10:]
         if len(kwargs_str) > 30:
             kwargs_str = kwargs_str[:10] + '...' + kwargs_str[-10:]
-        print(f'[{func.__name__}]', f'START with input -- args: {args_str}; kwargs: {kwargs_str}')
+        print(
+            f'[{func.__name__}]',
+            f'START with input -- args: {args_str}; kwargs: {kwargs_str}')
         result = func(*args, **kwargs)
         print(f'END [{func.__name__}]')
         return result
     return warp
 
+
 class Engine:
     def __init__(self, openai_api_key: Optional[str] = None, temparature: float = 0.8,
-                 mismatch_tolerance: float = 0.1, max_iteration: int = 3, simpify_regex:bool=True, verbose: bool=False):
+                 mismatch_tolerance: float = 0.1, max_iteration: int = 3, simpify_regex: bool = True, verbose: bool = False):
         if openai_api_key is None:
             openai_api_key = os.environ["OPENAI_API_KEY"]
         self._openai_llm = OpenAI(

@@ -11,11 +11,13 @@ print('regex target:', regex_target)
 print('# of target examples:', len(target_examples))
 regex_inferenced = engine.run(regex_instance['examples'])
 print('regex predict:', regex_inferenced)
-recall = 1. - len(engine.filter_mismatch(regex_inferenced, target_examples)) / len(target_examples)
+recall = 1. - len(engine.filter_mismatch(regex_inferenced,
+                  target_examples)) / len(target_examples)
 print('recall:', recall)
 if SHOW_PRECISION:
     simulated_examples = [e for e in exrex.generate(regex_inferenced)]
     print('# of simulated examples:', len(simulated_examples))
-    precision = 1. - len(engine.filter_mismatch(regex_target, simulated_examples)) / len(simulated_examples)
+    precision = 1. - len(engine.filter_mismatch(regex_target,
+                         simulated_examples)) / len(simulated_examples)
     print('precision:', precision)
-    print('F1-Score:', 2./(1./(precision)+1./(recall)))
+    print('F1-Score:', 2. / (1. / (precision) + 1. / (recall)))
