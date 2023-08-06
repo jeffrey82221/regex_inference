@@ -39,14 +39,14 @@ class Engine:
         self._simpify_regex = simpify_regex
         if verbose:
             self.run = make_verbose(self.run)  # type: ignore
-            self.filter_mismatch = make_verbose(
+            self.filter_mismatch = make_verbose(  # type: ignore
                 self.filter_mismatch)  # type: ignore
             self._run = make_verbose(self._run)  # type: ignore
-            self._run_simplify_regex = make_verbose(
+            self._run_simplify_regex = make_verbose(  # type: ignore
                 self._run_simplify_regex)  # type: ignore
-            self._run_alter_regex = make_verbose(
+            self._run_alter_regex = make_verbose(  # type: ignore
                 self._run_alter_regex)  # type: ignore
-            self._run_new_inference = make_verbose(
+            self._run_new_inference = make_verbose(  # type: ignore
                 self._run_new_inference)  # type: ignore
         self._setup_lang_chains()
 
