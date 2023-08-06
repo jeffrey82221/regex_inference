@@ -5,10 +5,23 @@ from typing import List, Optional
 import re
 import os
 
+def make_verbose(func):
+    def warp(*args, **kwargs):
+        args_str = str(args)
+        kwargs_str = str(kwargs)
+        if len(args_str) > 30:
+            args_str = args_str[:10] + '...' + args_str[-10:]
+        if len(kwargs_str) > 30:
+            kwargs_str = kwargs_str[:10] + '...' + kwargs_str[-10:]
+        print(f'[{func.__name__}]', f'START with input -- args: {args_str}; kwargs: {kwargs_str}')
+        result = func(*args, **kwargs)
+        print(f'END [{func.__name__}]')
+        return result
+    return warp
 
 class Engine:
     def __init__(self, openai_api_key: Optional[str] = None, temparature: float = 0.8,
-                 mismatch_tolerance: float = 0.1, max_iteration: int = 3):
+                 mismatch_tolerance: float = 0.1, max_iteration: int = 3, simpify_regex:bool=True, verbose: bool=False):
         if openai_api_key is None:
             openai_api_key = os.environ["OPENAI_API_KEY"]
         self._openai_llm = OpenAI(
@@ -19,6 +32,14 @@ class Engine:
         )
         self._mismatch_tolerance = mismatch_tolerance
         self._max_iteration = max_iteration
+        self._simpify_regex = simpify_regex
+        if verbose:
+            self.run = make_verbose(self.run)
+            self._run = make_verbose(self._run)
+            self._run_simplify_regex = make_verbose(self._run_simplify_regex)
+            self.filter_mismatch = make_verbose(self.filter_mismatch)
+            self._run_alter_regex = make_verbose(self._run_alter_regex)
+            self._run_new_inference = make_verbose(self._run_new_inference)
         self._setup_lang_chains()
 
     def run(self, patterns: List[str], regex: Optional[str] = None) -> str:
@@ -26,12 +47,14 @@ class Engine:
             patterns) > 0, '`patterns` input to `run` should no be an empty list'
         if regex is None:
             regex = self._run(patterns)
-        regex = self._run_simplify_regex(regex, patterns)
+        if self._simpify_regex:
+            regex = self._run_simplify_regex(regex, patterns)
         failed_patterns = self.filter_mismatch(regex, patterns)
         while failed_patterns:
             failed_regex = self._run(failed_patterns)
             regex = f'{regex}|{failed_regex}'
-            regex = self._run_simplify_regex(regex, patterns)
+            if self._simpify_regex:
+                regex = self._run_simplify_regex(regex, patterns)
             failed_patterns = self.filter_mismatch(regex, patterns)
         return regex
 
