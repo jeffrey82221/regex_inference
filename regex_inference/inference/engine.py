@@ -83,7 +83,7 @@ class Engine:
             except BaseException:
                 pass
         return result
-    
+
     def explain(self, regex: str) -> None:
         result = self._regex_explain_chain.run(regex)
         print(result)
@@ -115,6 +115,7 @@ class Engine:
             prompt=self.explain_regex_prompt,
             llm=self._openai_llm
         )
+
     @property
     def new_inference_prompt(self) -> PromptTemplate:
         template = """Question: Show me the best and shortest regex that can fully match the strings that I provide to you.
@@ -185,9 +186,9 @@ The resulting revise regex is:
 
     @property
     def explain_regex_prompt(self) -> PromptTemplate:
-        template = """Question: Explain the regex "{regex}" such that 
+        template = """Question: Explain the regex "{regex}" such that
 1. The role of each character in the regex is elaberated.
-2. Provide 5 most interpretive example strings that fullmatch the regex. 
+2. Provide 5 most interpretive example strings that fullmatch the regex.
 
 The explaination is: """
         prompt = PromptTemplate(
