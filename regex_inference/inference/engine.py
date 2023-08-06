@@ -84,7 +84,7 @@ class Engine:
                 pass
         return result
     
-    def explain(self, regex: str) -> str:
+    def explain(self, regex: str) -> None:
         result = self._regex_explain_chain.run(regex)
         print(result)
 
