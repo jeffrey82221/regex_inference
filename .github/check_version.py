@@ -14,7 +14,7 @@ def get_all_versions() -> str:
     try:
         req = requests.get(f"https://pypi.org/pypi/{PKG_NAME}/json")
         return list(req.json()["releases"].keys())
-    except:
+    except BaseException:
         return []
 
 
