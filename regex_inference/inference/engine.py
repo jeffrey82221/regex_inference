@@ -1,13 +1,13 @@
 from langchain import PromptTemplate
 from langchain.llms import OpenAI
 from langchain import LLMChain
-from typing import List, Optional
+from typing import List, Optional, Callable, Any
 import re
 import os
 
 
-def make_verbose(func):
-    def warp(*args, **kwargs):
+def make_verbose(func: Callable) -> Callable:
+    def warp(*args: Any, **kwargs: Any) -> Any:
         args_str = str(args)
         kwargs_str = str(kwargs)
         if len(args_str) > 30:
