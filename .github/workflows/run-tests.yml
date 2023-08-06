@@ -19,7 +19,7 @@ jobs:
         run: | 
          pip install mypy
          pip install types-requests
-         mypy jsonschema_inference --ignore-missing-imports
+         mypy regex_inference --ignore-missing-imports
       - name: flake8 checking
         run: |
          pip install flake8
