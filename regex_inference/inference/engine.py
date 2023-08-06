@@ -27,12 +27,12 @@ class Engine:
         if regex is None:
             regex = self._run(patterns)
         regex = self._run_simplify_regex(regex, patterns)
-        failed_patterns = self._get_mismatching_patterns(patterns, regex)
+        failed_patterns = self.filter_mismatch(regex, patterns)
         while failed_patterns:
             failed_regex = self._run(failed_patterns)
             regex = f'{regex}|{failed_regex}'
             regex = self._run_simplify_regex(regex, patterns)
-            failed_patterns = self._get_mismatching_patterns(patterns, regex)
+            failed_patterns = self.filter_mismatch(regex, patterns)
         return regex
 
     def _run(self, patterns: List[str], regex: Optional[str] = None) -> str:
@@ -88,12 +88,12 @@ class Engine:
         result = self._regex_explain_chain.run(regex)
         print(result)
 
-    def _get_mismatching_patterns(
-            self, patterns: List[str], result_regex: str) -> List[str]:
+    def filter_mismatch(
+            self, regex: str, patterns: List[str]) -> List[str]:
         try:
-            re_com = re.compile(result_regex)
+            re_com = re.compile(regex)
         except BaseException as e:
-            print('syntax error in result_regex:', result_regex)
+            print('syntax error in result_regex:', regex)
             raise e
         result = list(filter(lambda x: re_com.fullmatch(x) is None, patterns))
         return result
