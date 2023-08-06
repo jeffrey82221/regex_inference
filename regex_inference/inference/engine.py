@@ -14,7 +14,7 @@ class Engine:
         self._openai_llm = OpenAI(
             openai_api_key=openai_api_key,
             temperature=temparature,
-            model='text-davinci-003', # https://platform.openai.com/docs/models/gpt-3-5
+            model='text-davinci-003',  # https://platform.openai.com/docs/models/gpt-3-5
             client='regex_inference'
         )
         self._mismatch_tolerance = mismatch_tolerance
