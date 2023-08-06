@@ -233,7 +233,7 @@ patterns = [
 ]
 
 if __name__ == '__main__':
-    e = Engine()
+    e = Engine(verbose=True)
     start = time.time()
     regex = e.run(patterns)
     end = time.time()
