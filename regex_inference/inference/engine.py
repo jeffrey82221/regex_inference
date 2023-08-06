@@ -21,34 +21,16 @@ class Engine:
         self._max_iteration = max_iteration
         self._setup_lang_chains()
 
-    def _setup_lang_chains(self):
-        self._regex_alter_chain = LLMChain(
-            prompt=self.alter_regex_prompt,
-            llm=self._openai_llm
-        )
-        self._regex_revise_chain = LLMChain(
-            prompt=self.revise_regex_prompt,
-            llm=self._openai_llm
-        )
-        self._new_inference_chain = LLMChain(
-            prompt=self.new_inference_prompt,
-            llm=self._openai_llm
-        )
-        self._regex_simplify_chain = LLMChain(
-            prompt=self.simplify_regex_prompt,
-            llm=self._openai_llm
-        )
-
     def run(self, patterns: List[str], regex: Optional[str] = None) -> str:
         if regex is None:
             regex = self._run(patterns)
         regex = self._run_simplify_regex(regex, patterns)
-        failed_patterns = self._get_failed_patterns(patterns, regex)
+        failed_patterns = self._get_mismatching_patterns(patterns, regex)
         while failed_patterns:
             failed_regex = self._run(failed_patterns)
             regex = f'{regex}|{failed_regex}'
             regex = self._run_simplify_regex(regex, patterns)
-            failed_patterns = self._get_failed_patterns(patterns, regex)
+            failed_patterns = self._get_mismatching_patterns(patterns, regex)
         return regex
 
     def _run(self, patterns: List[str], regex: Optional[str] = None) -> str:
@@ -56,7 +38,6 @@ class Engine:
             regex_result = self._run_alter_regex(regex, patterns)
         else:
             regex_result = self._run_new_inference(patterns)
-        regex_result = self._revise_regex(patterns, regex_result)
         return regex_result
 
     def _run_alter_regex(self, regex: str, patterns: List[str]) -> str:
@@ -93,31 +74,7 @@ class Engine:
                 pass
         return result
 
-    def _run_revise_regex(self, regex: str, patterns: List[str]) -> str:
-        for _ in range(self._max_iteration):
-            result = self._regex_revise_chain.run(
-                regex=regex,
-                strings='\n'.join(patterns)).strip()
-            try:
-                re.compile(result)
-                break
-            except BaseException:
-                pass
-        return result
-
-    def _revise_regex(self, patterns: List[str], regex: str) -> str:
-        mismtach_patterns = self._get_failed_patterns(patterns, regex)
-        iter_count = 0
-        while len(mismtach_patterns) / \
-                len(patterns) >= self._mismatch_tolerance:
-            regex = self._run_revise_regex(regex, patterns)
-            mismtach_patterns = self._get_failed_patterns(patterns, regex)
-            iter_count += 1
-            if iter_count > self._max_iteration:
-                break
-        return regex
-
-    def _get_failed_patterns(
+    def _get_mismatching_patterns(
             self, patterns: List[str], result_regex: str) -> List[str]:
         try:
             re_com = re.compile(result_regex)
@@ -127,6 +84,20 @@ class Engine:
         result = list(filter(lambda x: re_com.fullmatch(x) is None, patterns))
         return result
 
+    def _setup_lang_chains(self):
+        self._regex_alter_chain = LLMChain(
+            prompt=self.alter_regex_prompt,
+            llm=self._openai_llm
+        )
+        self._new_inference_chain = LLMChain(
+            prompt=self.new_inference_prompt,
+            llm=self._openai_llm
+        )
+        self._regex_simplify_chain = LLMChain(
+            prompt=self.simplify_regex_prompt,
+            llm=self._openai_llm
+        )
+    
     @property
     def new_inference_prompt(self) -> PromptTemplate:
         template = """Question: Show me the best and shortest regex that can fully match the strings that I provide to you.
@@ -179,28 +150,6 @@ such that
 Note: Provide the resulting regex without wrapping it in quote
 The resulting revise regex is:
 """
-        prompt = PromptTemplate(
-            template=template,
-            input_variables=['regex', 'strings']
-        )
-        return prompt
-
-    @property
-    def revise_regex_prompt(self) -> PromptTemplate:
-        template = """Question: Revise the regex "{regex}" such that the following requirements is matched:
-*. The patterns fully match the regex still fully match the revised regex.
-*. The regex should be made more generalized (e.g., use \\d to represent digit rather than using [0-9]) and shorter than the original regex.
-*. Match sure the resulting regex does not have syntax error.
-*. Use \\d to replace [0-9].
-*. Try to focus more on the global pattern rather than the local patterns.
-*. The character count of the resulting regex should not be larger than 30.
-*. The regex should be revised such that the provided mis-matched strings should be fully matched.
-
-Each string of the mis-matched strings is provided line-by-line as follows:
-{strings}
-
-Note: Provide the resulting regex without wrapping it in quote
-The resulting altered regex is: """
         prompt = PromptTemplate(
             template=template,
             input_variables=['regex', 'strings']
