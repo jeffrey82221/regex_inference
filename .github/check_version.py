@@ -21,6 +21,6 @@ def get_all_versions() -> str:
 if __name__ == '__main__':
     online_versions = get_all_versions()
     print('online versions:', online_versions)
-    my_version = pkg_resources.get_distribution('jskiner').version
+    my_version = pkg_resources.get_distribution(IMPORT_NAME).version
     print('this version:', my_version)
     assert my_version not in online_versions, "This version already uploaded!"
