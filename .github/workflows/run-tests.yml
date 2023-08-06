@@ -24,3 +24,7 @@ jobs:
         run: |
          pip install flake8
          flake8 --ignore=E501,W504
+      - name: check version
+        run: |
+          pip install requests
+          python .github/check_version.py
