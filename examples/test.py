@@ -1,7 +1,7 @@
 """
 Evaluate Inference using Precision / Recall / F1 Given Different Train count
 """
-from regex_inference import Engine
+from regex_inference import Engine, Evaluator
 import time
 import random
 TRAIN_CNT = 200
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     regex_list = e.get_regex_sequence(train_patterns)
     end = time.time()
     print('run time =', end - start)
-    precision, recall, f1 = Engine.evaluate_regex_list(
+    precision, recall, f1 = Evaluator.evaluate_regex_list(
         regex_list, eval_patterns)
     print('regex_list count:', len(regex_list))
     print('precision:', precision)

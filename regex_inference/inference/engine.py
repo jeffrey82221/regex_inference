@@ -9,13 +9,13 @@ TODO:
 - [ ] Add LLMChain to fix the regex with low F1 scores.
 """
 import typing
-from typing import List, Optional, Callable, Any, Dict, Tuple
+from typing import List, Optional, Callable, Any
 import re
 import os
-import exrex
 from langchain import PromptTemplate
 from langchain.llms import OpenAI
 from langchain import LLMChain
+from .filter import Filter
 
 
 def make_verbose(func: Callable) -> Callable:
@@ -67,116 +67,18 @@ class Engine:
         regex_list = self.get_regex_sequence(patterns)
         return Engine.merge_regex_sequence(regex_list)
 
-    @staticmethod
-    @typing.no_type_check
-    def get_statistics(
-            patterns: List[str], regex_list: List[str]) -> List[Dict]:
-        """
-        Args:
-            patterns: list of strings to be inferenced
-            regex_list: the regex sequenced inferenced by ChatGPT.
-        Returns:
-            results (list of dict):
-                result (dict with fields):
-                    - regex
-                    - n_sim_patterns (number of strings matching the regex)
-                    - n_matched_patterns
-        """
-        total_cnt = len(patterns)
-        results: List[Dict] = []
-        previous_matched: List[str] = []
-        for i in range(len(regex_list)):
-            result = dict()
-            result['regex'] = regex_list[i]
-            result['n_sim_patterns'] = exrex.count(result['regex'])
-            matched = Engine.filter_match(result['regex'], patterns)
-            result['n_matched_patterns'] = len(
-                set(matched) - set(previous_matched))
-            result['n_target_matching'] = total_cnt
-            total_cnt -= result['n_matched_patterns']
-            previous_matched.extend(matched)
-            previous_matched = list(set(previous_matched))
-            result['precision'] = result['n_matched_patterns'] / \
-                result['n_sim_patterns']
-            result['recall'] = result['n_matched_patterns'] / \
-                result['n_target_matching']
-            if result['precision'] == 0. or result['recall'] == 0.:
-                result['f1'] = 0.
-            else:
-                result['f1'] = 2. / \
-                    (1. / result['precision'] + 1. / result['recall'])
-            results.append(result)
-        return results
-
-    @staticmethod
-    def evaluate_regex_list(
-            regex_list: List[str], patterns: List[str]) -> Tuple[float, float, float]:
-        regex = Engine.merge_regex_sequence(regex_list)
-        divided_patterns = Engine.divide_patterns(regex_list, patterns)
-        recall = Engine.recall(regex, patterns)
-        precisions = []
-        for i in range(len(divided_patterns)):
-            negative_patterns = []
-            for not_i in [j for j in range(len(divided_patterns)) if j != i]:
-                negative_patterns.extend(divided_patterns[not_i])
-            precision = Engine.precision(
-                regex_list[i], divided_patterns[i], negative_patterns)
-            precisions.append(precision)
-        precision = sum(precisions) / len(precisions)
-        f1 = 2. / (1. / precision + 1. / recall)
-        return precision, recall, f1
-
-    @staticmethod
-    def recall(regex: str, patterns: List[str]) -> float:
-        """
-        Recall evaluate how well the regex capture the patterns presented.
-
-        Args:
-            - regex: whole regex consists of multiple sub-regex
-            - patterns: the patterns in the future or not presented but should be captured by the regex.
-        """
-        return len(Engine.filter_match(regex, patterns)) / len(patterns)
-
-    @staticmethod
-    def precision(
-            sub_regex: str, positive_patterns: List[str], negative_patterns: List[str]) -> float:
-        """
-        Precision evaluate how precise or explainable is the regex on the target patterns.
-
-        Because my goal is that each sub-regex should exactly match its target patterns,
-        the positive patterns and negative patterns for the sub-regex is defined as follows:
-
-        * positive_patterns: pattern presented previously and matched by the sub-regex
-        * negative_patterns: pattern not hosted by the sub-regex.
-        """
-        if positive_patterns:
-            return len(Engine.filter_match(sub_regex, positive_patterns)) / \
-                len(Engine.filter_match(sub_regex,
-                                        positive_patterns + negative_patterns))
-        else:
-            return 0.0
-
-    @staticmethod
-    def divide_patterns(regex_list: List[str],
-                        patterns: List[str]) -> List[List[str]]:
-        results = []
-        for regex in regex_list:
-            results.append(Engine.filter_match(regex, patterns))
-            patterns = Engine.filter_mismatch(regex, patterns)
-        return results
-
     def get_regex_sequence(self, patterns: List[str]) -> List[str]:
         assert len(
             patterns) > 0, '`patterns` input to `run` should no be an empty list'
         regex_list = [self._run_new_inference(patterns)]
-        mismatched_patterns = Engine.filter_mismatch(
+        mismatched_patterns = Filter.mismatch(
             Engine.merge_regex_sequence(regex_list),
             patterns
         )
         while mismatched_patterns:
             regex = self._run_new_inference(mismatched_patterns)
             regex_list.append(regex)
-            mismatched_patterns = Engine.filter_mismatch(
+            mismatched_patterns = Filter.mismatch(
                 Engine.merge_regex_sequence(regex_list), patterns)
         return regex_list
 
@@ -229,30 +131,6 @@ class Engine:
     def explain(self, regex: str) -> None:
         result = self._regex_explain_chain.run(regex)
         print(result)
-
-    @staticmethod
-    def filter_match(regex: str, patterns: List[str]) -> List[str]:
-        try:
-            re_com = re.compile(regex)
-        except BaseException as e:
-            print('syntax error in result_regex:', regex)
-            raise e
-        result = list(
-            filter(
-                lambda x: re_com.fullmatch(x) is not None,
-                patterns))
-        return result
-
-    @staticmethod
-    def filter_mismatch(
-            regex: str, patterns: List[str]) -> List[str]:
-        try:
-            re_com = re.compile(regex)
-        except BaseException as e:
-            print('syntax error in result_regex:', regex)
-            raise e
-        result = list(filter(lambda x: re_com.fullmatch(x) is None, patterns))
-        return result
 
     def _setup_lang_chains(self):
         self._regex_alter_chain = LLMChain(
