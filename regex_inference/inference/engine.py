@@ -4,7 +4,7 @@ TODO:
 - [ ] Add LLMChain to fix the regex with low F1 scores.
 """
 import typing
-from typing import List, Optional, Callable, Any, Dict, Union
+from typing import List, Optional, Callable, Any, Dict
 import re
 import os
 import exrex
