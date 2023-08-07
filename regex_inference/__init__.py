@@ -1,2 +1,3 @@
 from .inference import Engine
-__all__ = ['Engine']
+from .evaluator import Evaluator
+__all__ = ['Engine', 'Evaluator']

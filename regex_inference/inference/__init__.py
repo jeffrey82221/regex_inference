@@ -1,2 +1,3 @@
 from .engine import Engine
-__all__ = ['Engine']
+from .filter import Filter
+__all__ = ['Engine', 'Filter']
