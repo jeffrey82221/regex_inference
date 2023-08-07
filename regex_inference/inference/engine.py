@@ -1,10 +1,15 @@
 """
 TODO:
+- [ ] Evaluation Metrics Design
+    - [ ] F1-Score / Precision / Recall should work on whole Regex
+        - [ ] Precision's base is random generated strings.
+    - [ ] Using Accuracy to quantize the non-overlapping explainability of sub-regex.
+        - [ ] ((# correctly match of positive patterns) + (# correctly mismatch of negative patterns)) / (# all patterns)
 - [ ] Consider continual inferencing mode: statistics should evaluate on the future cases.
 - [ ] Add LLMChain to fix the regex with low F1 scores.
 """
 import typing
-from typing import List, Optional, Callable, Any, Dict
+from typing import List, Optional, Callable, Any, Dict, Tuple
 import re
 import os
 import exrex
@@ -101,6 +106,63 @@ class Engine:
                 result['f1'] = 2. / \
                     (1. / result['precision'] + 1. / result['recall'])
             results.append(result)
+        return results
+
+    @staticmethod
+    def evaluate_regex_list(
+            regex_list: List[str], patterns: List[str]) -> Tuple[float, float, float]:
+        regex = Engine.merge_regex_sequence(regex_list)
+        divided_patterns = Engine.divide_patterns(regex_list, patterns)
+        recall = Engine.recall(regex, patterns)
+        precisions = []
+        for i in range(len(divided_patterns)):
+            negative_patterns = []
+            for not_i in [j for j in range(len(divided_patterns)) if j != i]:
+                negative_patterns.extend(divided_patterns[not_i])
+            precision = Engine.precision(
+                regex_list[i], divided_patterns[i], negative_patterns)
+            precisions.append(precision)
+        precision = sum(precisions) / len(precisions)
+        f1 = 2. / (1. / precision + 1. / recall)
+        return precision, recall, f1
+
+    @staticmethod
+    def recall(regex: str, patterns: List[str]) -> float:
+        """
+        Recall evaluate how well the regex capture the patterns presented.
+
+        Args:
+            - regex: whole regex consists of multiple sub-regex
+            - patterns: the patterns in the future or not presented but should be captured by the regex.
+        """
+        return len(Engine.filter_match(regex, patterns)) / len(patterns)
+
+    @staticmethod
+    def precision(
+            sub_regex: str, positive_patterns: List[str], negative_patterns: List[str]) -> float:
+        """
+        Precision evaluate how precise or explainable is the regex on the target patterns.
+
+        Because my goal is that each sub-regex should exactly match its target patterns,
+        the positive patterns and negative patterns for the sub-regex is defined as follows:
+
+        * positive_patterns: pattern presented previously and matched by the sub-regex
+        * negative_patterns: pattern not hosted by the sub-regex.
+        """
+        if positive_patterns:
+            return len(Engine.filter_match(sub_regex, positive_patterns)) / \
+                len(Engine.filter_match(sub_regex,
+                                        positive_patterns + negative_patterns))
+        else:
+            return 0.0
+
+    @staticmethod
+    def divide_patterns(regex_list: List[str],
+                        patterns: List[str]) -> List[List[str]]:
+        results = []
+        for regex in regex_list:
+            results.append(Engine.filter_match(regex, patterns))
+            patterns = Engine.filter_mismatch(regex, patterns)
         return results
 
     def get_regex_sequence(self, patterns: List[str]) -> List[str]:
