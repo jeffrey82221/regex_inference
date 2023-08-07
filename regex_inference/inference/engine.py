@@ -3,6 +3,7 @@ TODO:
 - [ ] Consider continual inferencing mode: statistics should evaluate on the future cases.
 - [ ] Add LLMChain to fix the regex with low F1 scores.
 """
+import typing
 from typing import List, Optional, Callable, Any, Dict, Union
 import re
 import os
@@ -44,21 +45,26 @@ class Engine:
         self._max_iteration = max_iteration
         self._simpify_regex = simpify_regex
         if verbose:
-            self.run = make_verbose(self.run)  # type: ignore
-            self.filter_mismatch = make_verbose(  # type: ignore
-                self.filter_mismatch)  # type: ignore
-            self._run_simplify_regex = make_verbose(  # type: ignore
-                self._run_simplify_regex)  # type: ignore
-            self._run_alter_regex = make_verbose(  # type: ignore
-                self._run_alter_regex)  # type: ignore
-            self._run_new_inference = make_verbose(  # type: ignore
-                self._run_new_inference)  # type: ignore
+            self._make_verbose()
         self._setup_lang_chains()
+
+    @typing.no_type_check
+    def _make_verbose(self):
+        self.run = make_verbose(self.run)
+        self.filter_mismatch = make_verbose(
+            self.filter_mismatch)
+        self._run_simplify_regex = make_verbose(
+            self._run_simplify_regex)
+        self._run_alter_regex = make_verbose(
+            self._run_alter_regex)
+        self._run_new_inference = make_verbose(
+            self._run_new_inference)
 
     def run(self, patterns: List[str]) -> str:
         regex_list = self.get_regex_sequence(patterns)
         return Engine.merge_regex_sequence(regex_list)
 
+    @typing.no_type_check
     def get_statistics(
             self, patterns: List[str], regex_list: List[str]) -> List[Dict]:
         """
@@ -76,7 +82,7 @@ class Engine:
         results: List[Dict] = []
         previous_matched: List[str] = []
         for i in range(len(regex_list)):
-            result: Dict[str, Union[float, str, int]] = dict()
+            result = dict()
             result['regex'] = regex_list[i]
             result['n_sim_patterns'] = exrex.count(result['regex'])
             matched = self.filter_match(result['regex'], patterns)
