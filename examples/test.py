@@ -240,6 +240,6 @@ if __name__ == '__main__':
     end = time.time()
     print('run time =', end - start)
     print(regex_list)
-    statistics = e.get_statistics(patterns, regex_list)
+    statistics = Engine.get_statistics(patterns, regex_list)
     pprint.pprint(statistics)
     # e.explain(regex[0])

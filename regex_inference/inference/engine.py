@@ -51,8 +51,6 @@ class Engine:
     @typing.no_type_check
     def _make_verbose(self):
         self.run = make_verbose(self.run)
-        self.filter_mismatch = make_verbose(
-            self.filter_mismatch)
         self._run_simplify_regex = make_verbose(
             self._run_simplify_regex)
         self._run_alter_regex = make_verbose(
@@ -64,9 +62,10 @@ class Engine:
         regex_list = self.get_regex_sequence(patterns)
         return Engine.merge_regex_sequence(regex_list)
 
+    @staticmethod
     @typing.no_type_check
     def get_statistics(
-            self, patterns: List[str], regex_list: List[str]) -> List[Dict]:
+            patterns: List[str], regex_list: List[str]) -> List[Dict]:
         """
         Args:
             patterns: list of strings to be inferenced
@@ -85,7 +84,7 @@ class Engine:
             result = dict()
             result['regex'] = regex_list[i]
             result['n_sim_patterns'] = exrex.count(result['regex'])
-            matched = self.filter_match(result['regex'], patterns)
+            matched = Engine.filter_match(result['regex'], patterns)
             result['n_matched_patterns'] = len(
                 set(matched) - set(previous_matched))
             result['n_target_matching'] = total_cnt
@@ -108,14 +107,14 @@ class Engine:
         assert len(
             patterns) > 0, '`patterns` input to `run` should no be an empty list'
         regex_list = [self._run_new_inference(patterns)]
-        mismatched_patterns = self.filter_mismatch(
+        mismatched_patterns = Engine.filter_mismatch(
             Engine.merge_regex_sequence(regex_list),
             patterns
         )
         while mismatched_patterns:
             regex = self._run_new_inference(mismatched_patterns)
             regex_list.append(regex)
-            mismatched_patterns = self.filter_mismatch(
+            mismatched_patterns = Engine.filter_mismatch(
                 Engine.merge_regex_sequence(regex_list), patterns)
         return regex_list
 
@@ -169,7 +168,8 @@ class Engine:
         result = self._regex_explain_chain.run(regex)
         print(result)
 
-    def filter_match(self, regex: str, patterns: List[str]) -> List[str]:
+    @staticmethod
+    def filter_match(regex: str, patterns: List[str]) -> List[str]:
         try:
             re_com = re.compile(regex)
         except BaseException as e:
@@ -181,8 +181,9 @@ class Engine:
                 patterns))
         return result
 
+    @staticmethod
     def filter_mismatch(
-            self, regex: str, patterns: List[str]) -> List[str]:
+            regex: str, patterns: List[str]) -> List[str]:
         try:
             re_com = re.compile(regex)
         except BaseException as e:
