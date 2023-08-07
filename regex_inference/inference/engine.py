@@ -3,7 +3,7 @@ TODO:
 - [ ] Consider continual inferencing mode: statistics should evaluate on the future cases.
 - [ ] Add LLMChain to fix the regex with low F1 scores.
 """
-from typing import List, Optional, Callable, Any, Dict
+from typing import List, Optional, Callable, Any, Dict, Union
 import re
 import os
 import exrex
@@ -73,10 +73,10 @@ class Engine:
                     - n_matched_patterns
         """
         total_cnt = len(patterns)
-        results = []
-        previous_matched = []
+        results: List[Dict] = []
+        previous_matched: List[str] = []
         for i in range(len(regex_list)):
-            result = dict()
+            result: Dict[str, Union[float, str, int]] = dict()
             result['regex'] = regex_list[i]
             result['n_sim_patterns'] = exrex.count(result['regex'])
             matched = self.filter_match(result['regex'], patterns)
