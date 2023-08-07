@@ -1,5 +1,6 @@
 from regex_inference import Engine
 import time
+import pprint
 
 patterns = [
     "0.0.1",
@@ -235,8 +236,10 @@ patterns = [
 if __name__ == '__main__':
     e = Engine(verbose=True)
     start = time.time()
-    regex = e.run(patterns)
+    regex_list = e.get_regex_sequence(patterns)
     end = time.time()
     print('run time =', end - start)
-    print(regex)
-    e.explain(regex)
+    print(regex_list)
+    statistics = Engine.get_statistics(patterns, regex_list)
+    pprint.pprint(statistics)
+    # e.explain(regex[0])
