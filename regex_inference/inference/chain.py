@@ -35,6 +35,10 @@ class Chain:
             prompt=self.explain_regex_prompt,
             llm=self._openai_llm
         )
+        self.fix_regex = LLMChain(
+            prompt=self.fix_regex_prompt,
+            llm=self._openai_llm
+        )
 
     @property
     def new_inference_prompt(self) -> PromptTemplate:
@@ -115,5 +119,38 @@ The explaination is: """
         prompt = PromptTemplate(
             template=template,
             input_variables=['regex']
+        )
+        return prompt
+
+    @property
+    def fix_regex_prompt(self) -> PromptTemplate:
+        template = """Question: I will provide you somes facts and demand you to think about them for generating the answer.
+{facts}
+I demand you to alter each regex and show each altered regex as answer.
+
+The criteria for each altered regex is that:
+1. The altered regex should still correctly match the patterns that is correctly match.
+2. The altered regex should exclude the pattern mistakenly matched. That is, those mistakenly match patterns should not be matched.
+
+
+Note that:
+1. The regex before and after the alteration should be double quoted.
+2. The regex before and after the alteration should be shown line-by-line.
+3. The regex before and after the alteration should be listed in the same line.
+4. The regex before and after the alteration should be separated by "," mark.
+5. Do not show any additional text besides regex.
+6. In the answer, the regex before the alteration should not be different from those provided in Fact 0.
+
+An example to the answer is:
+
+"original_regex_1","altered_regex_1"
+"original_regex_2","altered_regex_2"
+"original_regex_3","altered_regex_3"
+
+The answer is:
+        """
+        prompt = PromptTemplate(
+            template=template,
+            input_variables=['facts']
         )
         return prompt

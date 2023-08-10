@@ -15,10 +15,13 @@ from .filter import Filter
 from .chain import Chain
 from ..utils import make_verbose
 
+
 class Engine:
     def __init__(self, openai_api_key: Optional[str] = None, temperature: float = 0.8,
                  mismatch_tolerance: float = 0.1, max_iteration: int = 3, simpify_regex: bool = True, verbose: bool = False):
-        self._chain = Chain(openai_api_key=openai_api_key, temperature=temperature)
+        self._chain = Chain(
+            openai_api_key=openai_api_key,
+            temperature=temperature)
         self._mismatch_tolerance = mismatch_tolerance
         self._max_iteration = max_iteration
         self._simpify_regex = simpify_regex
@@ -98,5 +101,3 @@ class Engine:
     def explain(self, regex: str) -> None:
         result = self._chain.explain_regex.run(regex)
         print(result)
-
-    
