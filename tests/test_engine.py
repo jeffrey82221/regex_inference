@@ -158,3 +158,23 @@ def test_emply_input():
     e = Engine()
     with pytest.raises(AssertionError):
         e.run([])
+
+def test_fix_regex_list():
+    e = Engine(temperature=0.0)
+    result = e.fix_regex_list(
+        ["[1-4]", "[3-5]", "[5-8]"],
+        [["1", "2", "3"], ["4", "5"], ["6", "7", "8"]],
+        [["4"], ["3"], ["5"]]
+    )
+    assert result[0] == '[1-3]'
+    assert result[1] in ('[45]', '[4-5]')
+    assert result[2] == '[6-8]'
+
+    result = e.fix_regex_list(
+        ["[1-4a]", "[3-5]", "[5-8]C"],
+        [["1", "2", "3"], ["4", "5"], ["6C", "7C", "8C"]],
+        [["4"], ["3"], ["5C"]]
+    )
+    assert result[0] == '[1-3a]'
+    assert result[1] in ('[45]', '[4-5]')
+    assert result[2] == '[6-8]C'

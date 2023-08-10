@@ -37,6 +37,47 @@ class Engine:
         regex_list = self.get_regex_sequence(patterns)
         return Engine.merge_regex_sequence(regex_list)
 
+    def fix_regex_list(self, regex_list: List[str], correct_patterns: List[List[str]], incorrect_patterns: List[List[str]]) -> List[str]:
+        assert len(regex_list) == len(correct_patterns)
+        assert len(regex_list) == len(incorrect_patterns)
+        
+        cnt = len(regex_list)
+        fact_0_str = f"""
+Fact 0:
+
+A list of regex describing {cnt} type of patterns is double quoted and shown as the following bullet points:
+    """
+        regex_list_str = "\n".join(
+            map(lambda x: f'{x[0]+1}. "{x[1]}"', enumerate(regex_list)))
+
+        facts = "\n\n".join(map(lambda i: f"""
+Fact {i+1}
+
+For regex number {i+1}, it correctly match the patterns double quoted and shown as follows:
+
+{Engine._convert_patterns_to_prompt(correct_patterns[i])}
+
+However, it mistakenly match the patterns double quoted and shown as follows:
+
+{Engine._convert_patterns_to_prompt(incorrect_patterns[i])}
+
+""", range(cnt)))
+        ans = self._chain.fix_regex.run(
+            facts=f"""
+{fact_0_str}
+
+{regex_list_str}
+
+Now, I will provide to you the other {cnt} facts.
+
+{facts}
+        """
+        )
+        parsed_result = list(map(eval, ans.strip().split()))
+        for regex, result in zip(regex_list, parsed_result):
+            assert regex == result[0]
+        return list(map(lambda x: x[1], parsed_result))
+
     def get_regex_sequence(self, patterns: List[str]) -> List[str]:
         assert len(
             patterns) > 0, '`patterns` input to `run` should no be an empty list'
