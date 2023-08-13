@@ -9,7 +9,7 @@ TODO:
 - [ ] Add LLMChain to fix the regex with low F1 scores.
 """
 import typing
-from typing import List, Optional, Callable, Any
+from typing import List, Optional, Dict, Tuple
 import re
 from .filter import Filter
 from .chain import Chain
@@ -32,15 +32,74 @@ class Engine:
     def _make_verbose(self):
         self.run = make_verbose(self.run)
         self._run_new_inference = make_verbose(self._run_new_inference)
+        self._fix_regex = make_verbose(self._fix_regex)
 
     def run(self, patterns: List[str]) -> str:
         regex_list = self.get_regex_sequence(patterns)
         return Engine.merge_regex_sequence(regex_list)
 
-    def fix_regex_list(self, regex_list: List[str], correct_patterns: List[List[str]], incorrect_patterns: List[List[str]]) -> List[str]:
-        assert len(regex_list) == len(correct_patterns)
-        assert len(regex_list) == len(incorrect_patterns)
-        
+    @staticmethod
+    def get_correction_data(regex_list: List[str], patterns: List[str]) -> Dict[str, Dict[str, List[str]]]:
+        """
+        Args:
+            - regex_list: the inference list of regex
+            - the target patterns
+
+        Returns:
+            - correction_data (dict)
+                - key: regex
+                - value (dict)
+                    - fields:
+                        - correct
+                        - incorrect
+        """
+        divided_patterns = Engine._divide_patterns(regex_list, patterns)
+        result = dict()
+        for i, regex in enumerate(regex_list):
+            matched_patterns = Filter.match(regex_list[i], patterns)
+            correct_patterns = divided_patterns[i]
+            incorrect_patterns = list(set(matched_patterns)-set(correct_patterns))
+            result[regex] = {
+                'correct': correct_patterns, 
+                'incorrect': incorrect_patterns    
+            }
+        return result
+
+    @staticmethod
+    def _divide_patterns(regex_list: List[str],
+                         patterns: List[str]) -> List[List[str]]:
+        """
+        Seperate a list of patterns to match the regex in regex_list
+        """
+        results = []
+        for regex in regex_list:
+            results.append(Filter.match(regex, patterns))
+            patterns = Filter.mismatch(regex, patterns)
+        return results
+    
+    def fix_regex(self, regex: str, correction_data: Dict[str, Dict[str, List[str]]]) -> str:
+        for _ in range(self._max_iteration):
+            try:
+                result = self._fix_regex(regex, correction_data)
+                re.compile(result)
+                break
+            except KeyboardInterrupt as e:
+                raise e
+            except (ValueError, AssertionError):
+                pass
+        return result
+
+    def _fix_regex(self, regex: str, correction_data: Dict[str, Dict[str, List[str]]]) -> str:
+        """
+        Args:
+            - regex_list: a list of regex to be fixed 
+            - correction_data: output of `get_correction_data`
+        Return
+            - fixed_regex_list: the corrected regex
+        """
+        regex_list = [regex]
+        correct_patterns = [correction_data[regex]['correct'] for regex in regex_list]
+        incorrect_patterns = [correction_data[regex]['incorrect'] for regex in regex_list]
         cnt = len(regex_list)
         fact_0_str = f"""
 Fact 0:
@@ -73,10 +132,25 @@ Now, I will provide to you the other {cnt} facts.
 {facts}
         """
         )
-        parsed_result = list(map(eval, ans.strip().split()))
+        if ans.endswith('""'):
+            ans = ans[:-1]
+        try:
+            parsed_result = list(map(eval, ans.strip().split('\n')))
+        except SyntaxError as e:
+            raise ValueError(ans) from e
+
+        assert len(regex_list) == len(parsed_result)
         for regex, result in zip(regex_list, parsed_result):
-            assert regex == result[0]
-        return list(map(lambda x: x[1], parsed_result))
+            try:
+                assert regex == result[0], f'original regex is changed: {regex[0]}!={regex}'
+                assert re.compile(result[1]), f'{result[1]} cannot be compiled'
+            except BaseException as e:
+                raise ValueError(f'Parsing result {result} failed') from e
+        try:
+            result = list(map(lambda x: x[1], parsed_result))
+        except IndexError as e:
+            raise ValueError(parsed_result) from e
+        return result[0]
 
     def get_regex_sequence(self, patterns: List[str]) -> List[str]:
         assert len(
@@ -110,6 +184,8 @@ Now, I will provide to you the other {cnt} facts.
             try:
                 re.compile(result)
                 break
+            except KeyboardInterrupt as e:
+                raise e
             except BaseException:
                 pass
         return result
@@ -123,6 +199,8 @@ Now, I will provide to you the other {cnt} facts.
             try:
                 re.compile(result)
                 break
+            except KeyboardInterrupt as e:
+                raise e
             except BaseException:
                 pass
         return result
@@ -135,6 +213,8 @@ Now, I will provide to you the other {cnt} facts.
             try:
                 re.compile(result)
                 break
+            except KeyboardInterrupt as e:
+                raise e
             except BaseException:
                 pass
         return result
