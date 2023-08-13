@@ -39,22 +39,6 @@ if __name__ == '__main__':
     print('recall:', recall)
     print('f1:', f1)
 
-    """
-    train_patterns = random.sample(eval_patterns, TRAIN_CNT)
-    eval_patterns = list(set(eval_patterns) - set(train_patterns))
-    correction_data = e.get_correction_data(regex_list, train_patterns)
-    for i in range(len(regex_list)):
-        regex_list[i] = e.fix_regex(regex_list[i], correction_data)
-        print('regex', i, 'corrected as', regex_list[i])
-    precision, recall, f1 = Evaluator.evaluate_regex_list(
-        regex_list, eval_patterns)
-    print('regex_list count:', len(regex_list))
-    print('precision:', precision)
-    print('recall:', recall)
-    print('f1:', f1)
-    """
-
-
 """
 Result:
 
