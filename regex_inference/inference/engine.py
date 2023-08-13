@@ -34,10 +34,6 @@ class Engine:
         self._run_new_inference = make_verbose(self._run_new_inference)
         self._fix_regex = make_verbose(self._fix_regex)
 
-    def run(self, patterns: List[str]) -> str:
-        regex_list = self.get_regex_sequence(patterns)
-        return Engine.merge_regex_sequence(regex_list)
-
     @staticmethod
     def get_correction_data(regex_list: List[str], patterns: List[str]) -> Dict[str, Dict[str, List[str]]]:
         """
