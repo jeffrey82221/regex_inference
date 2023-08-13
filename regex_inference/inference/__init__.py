@@ -1,3 +1,4 @@
 from .engine import Engine
 from .filter import Filter
-__all__ = ['Engine', 'Filter']
+from .main import Inference
+__all__ = ['Engine', 'Filter', 'Inference']
