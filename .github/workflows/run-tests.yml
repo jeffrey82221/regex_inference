@@ -32,7 +32,7 @@ jobs:
       - name: run tests
         run: | 
           pip install pytest
-          pytest
+          pytest tests
         env: 
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       - name: check version

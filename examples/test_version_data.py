@@ -21,7 +21,8 @@ if __name__ == '__main__':
     regex = Engine.merge_regex_sequence(regex_list)
     print(regex)
     inferencer = Inference(verbose=False, n_thread=30)
-    regex_list = inferencer.get_regex_sequence(train_patterns, eval_patterns)
+    regex_list = inferencer.get_regex_sequence(
+        train_patterns, val_patterns=eval_patterns)
     precision, recall, f1 = Evaluator.evaluate_regex_list(
         regex_list, eval_patterns)
     print('regex_list count:', len(regex_list))
