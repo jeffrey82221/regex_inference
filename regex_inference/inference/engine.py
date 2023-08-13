@@ -9,7 +9,7 @@ TODO:
 - [ ] Add LLMChain to fix the regex with low F1 scores.
 """
 import typing
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict
 import re
 from .filter import Filter
 from .chain import Chain
