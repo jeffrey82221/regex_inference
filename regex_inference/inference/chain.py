@@ -138,14 +138,16 @@ Note that:
 2. The regex before and after the alteration should be shown line-by-line.
 3. The regex before and after the alteration should be listed in the same line.
 4. The regex before and after the alteration should be separated by "," mark.
-5. Do not show any additional text besides regex.
-6. In the answer, the regex before the alteration should not be different from those provided in Fact 0.
+5. The regex before and after the alteration together should be wrapped with parenthesis "()". 
+6. Only show the lines with regex.
+7. In the answer, the regex before the alteration should not be different from those provided in Fact 0.
+8. The number of lines in the answer should be equal to the number of regex provided.
 
 An example to the answer is:
 
-"original_regex_1","altered_regex_1"
-"original_regex_2","altered_regex_2"
-"original_regex_3","altered_regex_3"
+("original_regex_1", "altered_regex_1")
+("original_regex_2", "altered_regex_2")
+("original_regex_3", "altered_regex_3")
 
 The answer is:
         """
