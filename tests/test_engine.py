@@ -159,6 +159,7 @@ def test_emply_input():
     with pytest.raises(AssertionError):
         e.run([])
 
+
 def test_fix_regex_list():
     e = Engine(temperature=0.0)
     result = e.fix_regex_list(

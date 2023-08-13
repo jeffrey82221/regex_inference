@@ -2,6 +2,7 @@ from typing import Callable, Any
 import traceback
 import sys
 
+
 def make_verbose(func: Callable) -> Callable:
     def warp(*args: Any, **kwargs: Any) -> Any:
         args_str = str(args)

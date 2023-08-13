@@ -35,7 +35,8 @@ class Engine:
         self._fix_regex = make_verbose(self._fix_regex)
 
     @staticmethod
-    def get_correction_data(regex_list: List[str], patterns: List[str]) -> Dict[str, Dict[str, List[str]]]:
+    def get_correction_data(
+            regex_list: List[str], patterns: List[str]) -> Dict[str, Dict[str, List[str]]]:
         """
         Args:
             - regex_list: the inference list of regex
@@ -54,17 +55,19 @@ class Engine:
         for i, regex in enumerate(regex_list):
             matched_patterns = Filter.match(regex_list[i], patterns)
             correct_patterns = divided_patterns[i]
-            incorrect_patterns = list(set(matched_patterns)-set(correct_patterns))
+            incorrect_patterns = list(
+                set(matched_patterns) -
+                set(correct_patterns))
             result[regex] = {
-                'correct': correct_patterns, 
-                'incorrect': incorrect_patterns    
+                'correct': correct_patterns,
+                'incorrect': incorrect_patterns
             }
         return result
 
     def run(self, patterns: List[str]) -> str:
         regex_list = self.get_regex_sequence(patterns)
         return Engine.merge_regex_sequence(regex_list)
-    
+
     @staticmethod
     def _divide_patterns(regex_list: List[str],
                          patterns: List[str]) -> List[List[str]]:
@@ -76,13 +79,15 @@ class Engine:
             results.append(Filter.match(regex, patterns))
             patterns = Filter.mismatch(regex, patterns)
         return results
-    
-    def fix_regex_list(self, regex_list: List[str], correction_data: Dict[str, Dict[str, List[str]]]) -> List[str]:
+
+    def fix_regex_list(
+            self, regex_list: List[str], correction_data: Dict[str, Dict[str, List[str]]]) -> List[str]:
         for i, regex in enumerate(regex_list):
             regex_list[i] = self.fix_regex(regex, correction_data)
         return regex_list
-    
-    def fix_regex(self, regex: str, correction_data: Dict[str, Dict[str, List[str]]]) -> str:
+
+    def fix_regex(self, regex: str,
+                  correction_data: Dict[str, Dict[str, List[str]]]) -> str:
         for _ in range(self._max_iteration):
             try:
                 result = self._fix_regex(regex, correction_data)
@@ -94,17 +99,20 @@ class Engine:
                 pass
         return result
 
-    def _fix_regex(self, regex: str, correction_data: Dict[str, Dict[str, List[str]]]) -> str:
+    def _fix_regex(self, regex: str,
+                   correction_data: Dict[str, Dict[str, List[str]]]) -> str:
         """
         Args:
-            - regex_list: a list of regex to be fixed 
+            - regex_list: a list of regex to be fixed
             - correction_data: output of `get_correction_data`
         Return
             - fixed_regex_list: the corrected regex
         """
         regex_list = [regex]
-        correct_patterns = [correction_data[regex]['correct'] for regex in regex_list]
-        incorrect_patterns = [correction_data[regex]['incorrect'] for regex in regex_list]
+        correct_patterns = [correction_data[regex]['correct']
+                            for regex in regex_list]
+        incorrect_patterns = [correction_data[regex]
+                              ['incorrect'] for regex in regex_list]
         cnt = len(regex_list)
         fact_0_str = f"""
 Fact 0:

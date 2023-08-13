@@ -3,6 +3,7 @@ from threading import Thread
 from .engine import Engine
 from ..evaluator import Evaluator
 
+
 class Inference:
     def __init__(self, *args, **kwargs):
         if 'n_thread' in kwargs:
@@ -15,13 +16,15 @@ class Inference:
     def run(self, train_patterns: List[str], val_patterns: List[str]) -> str:
         regex_list = self.get_regex_sequence(train_patterns, val_patterns)
         return Engine.merge_regex_sequence(regex_list)
-        
-    def get_regex_sequence(self, train_patterns: List[str], val_patterns: List[str]) -> List[str]:
+
+    def get_regex_sequence(
+            self, train_patterns: List[str], val_patterns: List[str]) -> List[str]:
         class GetThread(Thread):
             def __init__(self, engine):
                 Thread.__init__(self)
                 self.value = None
                 self._engine = engine
+
             def run(self):
                 regex_list = self._engine.get_regex_sequence(train_patterns)
                 _, _, f1 = Evaluator.evaluate_regex_list(

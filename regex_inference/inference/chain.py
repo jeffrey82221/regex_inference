@@ -138,7 +138,7 @@ Note that:
 2. The regex before and after the alteration should be shown line-by-line.
 3. The regex before and after the alteration should be listed in the same line.
 4. The regex before and after the alteration should be separated by "," mark.
-5. The regex before and after the alteration together should be wrapped with parenthesis "()". 
+5. The regex before and after the alteration together should be wrapped with parenthesis "()".
 6. Only show the lines with regex.
 7. In the answer, the regex before the alteration should not be different from those provided in Fact 0.
 8. The number of lines in the answer should be equal to the number of regex provided.

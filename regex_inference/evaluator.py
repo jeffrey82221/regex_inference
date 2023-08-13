@@ -5,17 +5,18 @@ from .inference import Engine
 
 class Evaluator:
     @staticmethod
-    def evaluate_regex_list(regex_list: List[str], patterns: List[str]) -> Tuple[float, float, float]:
+    def evaluate_regex_list(
+            regex_list: List[str], patterns: List[str]) -> Tuple[float, float, float]:
         """
         Args:
-            - regex_list: regex to be evaluated 
+            - regex_list: regex to be evaluated
             - patterns: patterns to be matched by the regex_list
         Returns:
             - precision: describe how well each regex in the regex list describe the patterns
             - recall: describe how well the entire regex list match the patterns
-            - f1: combined score for precision and recall 
+            - f1: combined score for precision and recall
         """
-        
+
         recall = Evaluator.recall(regex_list, patterns)
         precision = Evaluator.precision(regex_list, patterns)
         f1 = 2. / (1. / precision + 1. / recall)
@@ -26,13 +27,14 @@ class Evaluator:
         divided_patterns = Engine._divide_patterns(regex_list, patterns)
         precisions = []
         for i in range(len(divided_patterns)):
-            negative_patterns = Evaluator._collect_negative_patterns(i, divided_patterns)
+            negative_patterns = Evaluator._collect_negative_patterns(
+                i, divided_patterns)
             precision = Evaluator.regex_precision(
                 regex_list[i], divided_patterns[i], negative_patterns)
             precisions.append(precision)
         precision = sum(precisions) / len(precisions)
         return precision
-    
+
     @staticmethod
     def recall(regex_list: List[str], patterns: List[str]) -> float:
         """
@@ -46,9 +48,11 @@ class Evaluator:
         return len(Filter.match(regex, patterns)) / len(patterns)
 
     @staticmethod
-    def _collect_negative_patterns(target_regex_index: int, divided_patterns: List[List[str]]) -> List[str]:
+    def _collect_negative_patterns(
+            target_regex_index: int, divided_patterns: List[List[str]]) -> List[str]:
         negative_patterns = []
-        for not_i in [j for j in range(len(divided_patterns)) if j != target_regex_index]:
+        for not_i in [j for j in range(
+                len(divided_patterns)) if j != target_regex_index]:
             negative_patterns.extend(divided_patterns[not_i])
         return negative_patterns
 
