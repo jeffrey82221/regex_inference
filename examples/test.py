@@ -4,6 +4,8 @@ Evaluate Inference using Precision / Recall / F1 Given Different Train count
 from regex_inference import Engine, Evaluator
 import time
 import random
+import pprint
+import threading
 TRAIN_CNT = 200
 whole_patterns = []
 with open('data/version.txt', 'r') as f:
@@ -11,17 +13,38 @@ with open('data/version.txt', 'r') as f:
 train_patterns = random.sample(whole_patterns, TRAIN_CNT)
 eval_patterns = list(set(whole_patterns) - set(train_patterns))
 if __name__ == '__main__':
-    e = Engine(verbose=True)
-    start = time.time()
-    regex_list = e.get_regex_sequence(train_patterns)
-    end = time.time()
-    print('run time =', end - start)
+    e = Engine(verbose=False)
+    def run():
+        regex_list = e.get_regex_sequence(train_patterns)
+        precision, recall, f1 = Evaluator.evaluate_regex_list(
+            regex_list, eval_patterns)
+        print('regex_list count:', len(regex_list))
+        print('precision:', precision)
+        print('recall:', recall)
+        print('f1:', f1)
+    threads = []
+    for i in range(10):
+        thread = threading.Thread(target=run)
+        threads.append(thread)
+        thread.start()
+    for thread in threads:
+        thread.join()
+    
+    """
+    train_patterns = random.sample(eval_patterns, TRAIN_CNT)
+    eval_patterns = list(set(eval_patterns) - set(train_patterns))
+    correction_data = e.get_correction_data(regex_list, train_patterns)
+    for i in range(len(regex_list)):
+        regex_list[i] = e.fix_regex(regex_list[i], correction_data)
+        print('regex', i, 'corrected as', regex_list[i])
     precision, recall, f1 = Evaluator.evaluate_regex_list(
         regex_list, eval_patterns)
     print('regex_list count:', len(regex_list))
     print('precision:', precision)
     print('recall:', recall)
     print('f1:', f1)
+    """  
+    
 
 """
 Result:

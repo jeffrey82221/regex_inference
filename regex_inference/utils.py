@@ -1,5 +1,6 @@
 from typing import Callable, Any
-
+import traceback
+import sys
 
 def make_verbose(func: Callable) -> Callable:
     def warp(*args: Any, **kwargs: Any) -> Any:
@@ -12,7 +13,11 @@ def make_verbose(func: Callable) -> Callable:
         print(
             f'[{func.__name__}]',
             f'START with input -- args: {args_str}; kwargs: {kwargs_str}')
-        result = func(*args, **kwargs)
-        print(f'END [{func.__name__}]')
+        try:
+            result = func(*args, **kwargs)
+            print(f'END [{func.__name__}]')
+        except BaseException as e:
+            traceback.print_exc(file=sys.stdout)
+            raise e
         return result
     return warp
