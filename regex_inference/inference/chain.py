@@ -2,7 +2,6 @@ import os
 from langchain.llms import OpenAI
 from langchain import PromptTemplate
 from langchain import LLMChain
-from ..utils import make_verbose
 __all__ = ['Chain']
 
 
