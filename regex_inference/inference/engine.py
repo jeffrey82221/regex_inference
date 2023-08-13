@@ -61,6 +61,10 @@ class Engine:
             }
         return result
 
+    def run(self, patterns: List[str]) -> str:
+        regex_list = self.get_regex_sequence(patterns)
+        return Engine.merge_regex_sequence(regex_list)
+    
     @staticmethod
     def _divide_patterns(regex_list: List[str],
                          patterns: List[str]) -> List[List[str]]:
@@ -72,6 +76,11 @@ class Engine:
             results.append(Filter.match(regex, patterns))
             patterns = Filter.mismatch(regex, patterns)
         return results
+    
+    def fix_regex_list(self, regex_list: List[str], correction_data: Dict[str, Dict[str, List[str]]]) -> List[str]:
+        for i, regex in enumerate(regex_list):
+            regex_list[i] = self.fix_regex(regex, correction_data)
+        return regex_list
     
     def fix_regex(self, regex: str, correction_data: Dict[str, Dict[str, List[str]]]) -> str:
         for _ in range(self._max_iteration):

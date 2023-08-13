@@ -5,12 +5,15 @@ from ..evaluator import Evaluator
 
 class Inference:
     def __init__(self, *args, **kwargs):
-        self._n_thread = kwargs['n_thread']
-        del kwargs['n_thread']
+        if 'n_thread' in kwargs:
+            self._n_thread = kwargs['n_thread']
+            del kwargs['n_thread']
+        else:
+            self._n_thread = 30
         self._engine = Engine(*args, **kwargs)
 
-    def run(self, patterns: List[str]) -> str:
-        regex_list = self.get_regex_sequence(patterns)
+    def run(self, train_patterns: List[str], val_patterns: List[str]) -> str:
+        regex_list = self.get_regex_sequence(train_patterns, val_patterns)
         return Engine.merge_regex_sequence(regex_list)
         
     def get_regex_sequence(self, train_patterns: List[str], val_patterns: List[str]) -> List[str]:

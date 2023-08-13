@@ -30,7 +30,15 @@ if __name__ == '__main__':
     print('f1:', f1)
     regex = Engine.merge_regex_sequence(regex_list)
     print(regex)
-    
+    correction_data = e.get_correction_data(regex_list, train_patterns)
+    regex_list = e.fix_regex_list(regex_list, correction_data)
+    precision, recall, f1 = Evaluator.evaluate_regex_list(
+        regex_list, eval_patterns)
+    print('regex_list count:', len(regex_list))
+    print('precision:', precision)
+    print('recall:', recall)
+    print('f1:', f1)
+
     """
     train_patterns = random.sample(eval_patterns, TRAIN_CNT)
     eval_patterns = list(set(eval_patterns) - set(train_patterns))
