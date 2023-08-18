@@ -1,42 +1,40 @@
 import os
+import torch
 from langchain.llms import OpenAI
 from langchain import PromptTemplate
 from langchain import LLMChain
+from langchain import HuggingFaceHub
+from langchain.llms import HuggingFacePipeline
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+
 __all__ = ['Chain']
 
 
 class Chain:
-    def __init__(self, openai_api_key=None, temperature=0.8):
-        if openai_api_key is None:
-            openai_api_key = os.environ["OPENAI_API_KEY"]
-        self._openai_llm = OpenAI(
-            openai_api_key=openai_api_key,
-            temperature=temperature,
-            model='text-davinci-003',  # https://platform.openai.com/docs/models/gpt-3-5
-            client='regex_inference'
-        )
+    def __init__(self, llm):
+        self._llm = llm
         self._setup_lang_chains()
 
     def _setup_lang_chains(self):
         self.inference_regex = LLMChain(
             prompt=self.new_inference_prompt,
-            llm=self._openai_llm
+            llm=self._llm
         )
         self.alter_regex = LLMChain(
             prompt=self.alter_regex_prompt,
-            llm=self._openai_llm
+            llm=self._llm
         )
         self.simplify_regex = LLMChain(
             prompt=self.simplify_regex_prompt,
-            llm=self._openai_llm
+            llm=self._llm
         )
         self.explain_regex = LLMChain(
             prompt=self.explain_regex_prompt,
-            llm=self._openai_llm
+            llm=self._llm
         )
         self.fix_regex = LLMChain(
             prompt=self.fix_regex_prompt,
-            llm=self._openai_llm
+            llm=self._llm
         )
 
     @property
@@ -54,6 +52,7 @@ Now, each instance of the strings that should be fully matched is provided line-
 Note that:
 1. The double quote is not part of the string instance. Ignore the double quote during inferencing the regex.
 2. Provide the resulting regex without wrapping it in quote
+3. Do not provide any other text besides the regex
 
 The resulting regex is: """
         prompt = PromptTemplate(

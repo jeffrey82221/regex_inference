@@ -5,13 +5,13 @@ from ..evaluator import Evaluator
 
 
 class Inference:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, llm, **kwargs):
         if 'n_thread' in kwargs:
             self._n_thread = kwargs['n_thread']
             del kwargs['n_thread']
         else:
             self._n_thread = 30
-        self._engine = Engine(*args, **kwargs)
+        self._engine = Engine(llm, **kwargs)
 
     def run(self, train_patterns: List[str],
             val_patterns: List[str] = []) -> str:

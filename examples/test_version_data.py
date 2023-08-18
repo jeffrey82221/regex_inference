@@ -10,7 +10,7 @@ with open('data/version.txt', 'r') as f:
 train_patterns = random.sample(whole_patterns, TRAIN_CNT)
 eval_patterns = list(set(whole_patterns) - set(train_patterns))
 if __name__ == '__main__':
-    e = Engine(verbose=False)
+    e = Engine(verbose=False, use_openai=False, model_id='EleutherAI/gpt-neox-20b', max_length=1000)
     regex_list = e.get_regex_sequence(train_patterns)
     precision, recall, f1 = Evaluator.evaluate_regex_list(
         regex_list, eval_patterns)
@@ -20,7 +20,7 @@ if __name__ == '__main__':
     print('f1:', f1)
     regex = Engine.merge_regex_sequence(regex_list)
     print(regex)
-    inferencer = Inference(verbose=False, n_thread=30)
+    inferencer = Inference(verbose=False, n_thread=5, use_openai=False, model_id='EleutherAI/gpt-neox-20b', max_length=1000)
     regex_list = inferencer.get_regex_sequence(
         train_patterns, val_patterns=eval_patterns)
     precision, recall, f1 = Evaluator.evaluate_regex_list(

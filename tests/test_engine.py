@@ -121,13 +121,6 @@ def patterns():
     ]
 
 
-def test_run(patterns):
-    e = Engine()
-    regex = e.run(patterns)
-    re_com = re.compile(regex)
-    for pattern in patterns:
-        check = re_com.fullmatch(pattern)
-        assert check is not None, f'{pattern} does not fullmatch {regex}'
 
 
 @pytest.fixture
@@ -144,25 +137,32 @@ def patterns_with_empty_string():
         "   "
     ]
 
+@pytest.fixture
+def engine():
+    return Engine(temperature=0.0)
 
-def test_run_with_empty_string(patterns_with_empty_string):
-    e = Engine()
-    regex = e.run(patterns_with_empty_string)
+def test_run(engine, patterns):
+    regex = engine.run(patterns)
+    re_com = re.compile(regex)
+    for pattern in patterns:
+        check = re_com.fullmatch(pattern)
+        assert check is not None, f'{pattern} does not fullmatch {regex}'
+
+def test_run_with_empty_string(engine, patterns_with_empty_string):
+    regex = engine.run(patterns_with_empty_string)
     re_com = re.compile(regex)
     for pattern in patterns_with_empty_string:
         check = re_com.fullmatch(pattern)
         assert check is not None, f'{pattern} does not fullmatch {regex}'
 
 
-def test_emply_input():
-    e = Engine()
+def test_emply_input(engine):
     with pytest.raises(AssertionError):
-        e.run([])
+        engine.run([])
 
 
-def test_fix_regex_list():
-    e = Engine(temperature=0.0)
-    result = e.fix_regex_list(
+def test_fix_regex_list(engine):
+    result = engine.fix_regex_list(
         ["[1-4]", "[3-5]", "[5-8]"],
         {
             '[1-4]': {

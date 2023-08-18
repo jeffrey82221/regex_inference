@@ -17,14 +17,20 @@ from ..utils import make_verbose
 
 
 class Engine:
-    def __init__(self, openai_api_key: Optional[str] = None, temperature: float = 0.8,
-                 mismatch_tolerance: float = 0.1, max_iteration: int = 3, simpify_regex: bool = True, verbose: bool = False):
+    def __init__(self, 
+            llm,
+            mismatch_tolerance: float = 0.1, 
+            max_iteration: int = 3, 
+            simpify_regex: bool = True, 
+            verbose: bool = False
+        ):
         self._chain = Chain(
-            openai_api_key=openai_api_key,
-            temperature=temperature)
+            llm=llm
+            )
         self._mismatch_tolerance = mismatch_tolerance
         self._max_iteration = max_iteration
         self._simpify_regex = simpify_regex
+        self._verbose = verbose
         if verbose:
             self._make_verbose()
 
@@ -220,16 +226,19 @@ Now, I will provide to you the other {cnt} facts.
 
     def _run_new_inference(self, patterns: List[str]) -> str:
         for _ in range(self._max_iteration):
+            print('[start] chain.inference_regex')
             result = self._chain.inference_regex.run(
                 Engine._convert_patterns_to_prompt(patterns)
             ).strip()
+            print('[end] chain.inference_regex')
             try:
                 re.compile(result)
                 break
             except KeyboardInterrupt as e:
                 raise e
             except BaseException:
-                pass
+                if self._verbose:
+                    print('result syntax error:', result)
         return result
 
     def explain(self, regex: str) -> None:

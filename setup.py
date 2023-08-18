@@ -57,6 +57,8 @@ setuptools.setup(
         'pydantic==1.10.12',
         'openai==0.27.8',
         'langchain==0.0.253',
+        'accelerate==0.21.0',
+        'bitsandbytes==0.41.1',
         'random_regex'
     ]
 )
