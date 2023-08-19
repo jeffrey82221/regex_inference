@@ -13,7 +13,8 @@ Candidate Models:
 4. bigcode/starcoder 
 5. decapoda-research/llama-65b-hf
 6. huggyllama/llama-7b
-
+7. MetaIX/GPT4-X-Alpasta-30b
+8. sahil2801/CodeAlpaca-20k
 """
 from regex_inference.inference.chain import Chain
 from regex_inference.inference.engine import Engine
@@ -29,20 +30,22 @@ train_patterns = random.sample(whole_patterns, TRAIN_CNT)
 eval_patterns = list(set(whole_patterns) - set(train_patterns))
 
 # huggingfacehub_api_token = os.environ["HUGGINGFACEHUB_API_TOKEN"]
-ONLINE = False
+ONLINE = True
 if ONLINE:
-    llm = HuggingFaceHub(repo_id='gnsepili/coder-llama2-7b', 
-                        model_kwargs={"max_new_tokens": 1000})
+    llm = HuggingFaceHub(repo_id='EleutherAI/gpt-neox-20b', 
+                        model_kwargs={"max_new_tokens": 1000, "temperature": 0.8})
 else:
     llm = HuggingFacePipeline.from_model_id(
-        model_id='Salesforce/codegen25-7b-mono',
+        model_id='EleutherAI/gpt-neox-20b',
         task="text-generation",
         pipeline_kwargs={"max_new_tokens": 1000, "temperature": 0.8},
-        model_kwargs={"trust_remote_code": True}
     )
-# chain = Chain(use_openai=False, model_id='bigcode/starcoder', max_length=1000, temperature=0.1)
-e = Engine(llm, verbose=True)
-# chain = Chain(use_openai=False, model_id='meta-llama/Llama-2-70b-chat-hf', max_length=1000, temperature=0.8)
-print('1.')
-ans = e.get_regex_sequence(train_patterns)
-print(ans)
+chain = Chain(llm)
+regex = chain.inference_regex.run(Engine._convert_patterns_to_prompt(train_patterns))
+def get_first_regex(regex):
+    regex = regex.split('\n')
+    for x in regex:
+        if len(x.strip()) > 0:
+            return x
+regex = get_first_regex(regex)
+print(regex)

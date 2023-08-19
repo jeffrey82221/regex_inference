@@ -52,7 +52,7 @@ Now, each instance of the strings that should be fully matched is provided line-
 Note that:
 1. The double quote is not part of the string instance. Ignore the double quote during inferencing the regex.
 2. Provide the resulting regex without wrapping it in quote
-3. Do not provide any other text besides the regex
+3. Do not provide any other text besides the regex in the first line. After the first line, there should be only lines with space characters.
 
 The resulting regex is: """
         prompt = PromptTemplate(
