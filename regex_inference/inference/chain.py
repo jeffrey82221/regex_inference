@@ -1,11 +1,8 @@
-import os
-import torch
-from langchain.llms import OpenAI
+import re
+from typing import List
 from langchain import PromptTemplate
 from langchain import LLMChain
-from langchain import HuggingFaceHub
-from langchain.llms import HuggingFacePipeline
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from .parser import Parser
 
 __all__ = ['Chain']
 
@@ -16,26 +13,54 @@ class Chain:
         self._setup_lang_chains()
 
     def _setup_lang_chains(self):
-        self.inference_regex = LLMChain(
+        self._inference_regex = LLMChain(
             prompt=self.new_inference_prompt,
             llm=self._llm
         )
-        self.alter_regex = LLMChain(
-            prompt=self.alter_regex_prompt,
-            llm=self._llm
-        )
-        self.simplify_regex = LLMChain(
-            prompt=self.simplify_regex_prompt,
-            llm=self._llm
-        )
-        self.explain_regex = LLMChain(
+        self._explain_regex = LLMChain(
             prompt=self.explain_regex_prompt,
             llm=self._llm
         )
-        self.fix_regex = LLMChain(
+        self._fix_regex = LLMChain(
             prompt=self.fix_regex_prompt,
             llm=self._llm
         )
+
+    def fix(self, regex: str, correct_patterns: List[str], incorrect_patterns: List[str]):
+
+        fact_0_str = f"""
+
+A regex to be fix is double quoted and shown as the follows:
+
+"{regex}"
+    """
+        fact_1_str = f"""
+
+It correctly match the patterns double quoted and shown as follows:
+{Parser.convert_patterns_to_prompt(correct_patterns)}
+However, it mistakenly match the patterns double quoted and shown as follows:
+{Parser.convert_patterns_to_prompt(incorrect_patterns)}
+        """
+
+        
+        result = self._fix_regex.run(
+            facts=f"""
+{fact_0_str}
+
+{fact_1_str}
+        """
+        )
+        return result
+
+    def inference(self, patterns):
+        strings = Parser.convert_patterns_to_prompt(patterns)
+        result = self._inference_regex.run(strings)
+        regex = Parser.select_regex_from_result(result)
+        return regex
+    
+    def explain(self, regex: str) -> None:
+        result = self._explain_regex.run(regex)
+        print(result)
 
     @property
     def new_inference_prompt(self) -> PromptTemplate:
@@ -62,52 +87,6 @@ The resulting regex is: """
         return prompt
 
     @property
-    def alter_regex_prompt(self) -> PromptTemplate:
-        template = """Question: Alter the regex "{regex}" such that the following requirements is matched:
-*. The pattern fully match the regex still fully match the regex.
-*. The regex should full match as many strings provided as possible.
-*. The regex should be as short as possible.
-*. The regex should not match strings that is not provided except for those full match the original regex.
-Now, each instance of the strings is provided line-by-line and wrapped by double quotes as follows:
-{strings}
-
-Note that:
-1. The double quote is not part of the string instance. Ignore the double quote during inferencing the regex.
-2. Provide the resulting regex without wrapping it in quote
-
-The resulting altered regex is: """
-        prompt = PromptTemplate(
-            template=template,
-            input_variables=['regex', 'strings']
-        )
-        return prompt
-
-    @property
-    def simplify_regex_prompt(self) -> PromptTemplate:
-        template = """
-Please revise the regex "{regex}"
-such that the following constraint start with *. can be met:
-*. The original regex consists of multiple regex seperated by "|". Try to combine the similar regex.
-*. After combine, the resulting regex should be as short as possible.
-*. The revised regex should still fully match all the strings full matched the original regex
-*. The revised regex should still fully match each of the strings I provided to you.
-Now, each instance of the strings is provided line-by-line and wrapped by double quotes as follows:
-{strings}
-
-
-Note that:
-1. The double quote is not part of the string instance. Ignore the double quote during inferencing the regex.
-2. Provide the resulting regex without wrapping it in quote
-
-The resulting revise regex is:
-"""
-        prompt = PromptTemplate(
-            template=template,
-            input_variables=['regex', 'strings']
-        )
-        return prompt
-
-    @property
     def explain_regex_prompt(self) -> PromptTemplate:
         template = """Question: Explain the regex "{regex}" such that
 1. The role of each character in the regex is elaberated.
@@ -122,32 +101,19 @@ The explaination is: """
 
     @property
     def fix_regex_prompt(self) -> PromptTemplate:
-        template = """Question: I will provide you somes facts and demand you to think about them for generating the answer.
+        template = """
 {facts}
-I demand you to alter each regex and show each altered regex as answer.
+Question: What is the altered regex that meet the following criteria?
+1. It correctly matches the patterns that is correctly match.
+2. It excludes the pattern mistakenly matched. That is, those mistakenly match patterns should not be matched.
 
-The criteria for each altered regex is that:
-1. The altered regex should still correctly match the patterns that is correctly match.
-2. The altered regex should exclude the pattern mistakenly matched. That is, those mistakenly match patterns should not be matched.
+Example Answer:
 
+The regex: 
 
-Note that:
-1. The regex before and after the alteration should be double quoted.
-2. The regex before and after the alteration should be shown line-by-line.
-3. The regex before and after the alteration should be listed in the same line.
-4. The regex before and after the alteration should be separated by "," mark.
-5. The regex before and after the alteration together should be wrapped with parenthesis "()".
-6. Only show the lines with regex.
-7. In the answer, the regex before the alteration should not be different from those provided in Fact 0.
-8. The number of lines in the answer should be equal to the number of regex provided.
+[2-9]
 
-An example to the answer is:
-
-("original_regex_1", "altered_regex_1")
-("original_regex_2", "altered_regex_2")
-("original_regex_3", "altered_regex_3")
-
-The answer is:
+Answer:
         """
         prompt = PromptTemplate(
             template=template,

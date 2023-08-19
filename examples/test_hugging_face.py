@@ -33,7 +33,7 @@ eval_patterns = list(set(whole_patterns) - set(train_patterns))
 ONLINE = True
 if ONLINE:
     llm = HuggingFaceHub(repo_id='EleutherAI/gpt-neox-20b', 
-                        model_kwargs={"max_new_tokens": 1000, "temperature": 0.8})
+                        model_kwargs={"max_new_tokens": 1000, "temperature": 0.2})
 else:
     llm = HuggingFacePipeline.from_model_id(
         model_id='EleutherAI/gpt-neox-20b',
@@ -41,11 +41,12 @@ else:
         pipeline_kwargs={"max_new_tokens": 1000, "temperature": 0.8},
     )
 chain = Chain(llm)
-regex = chain.inference_regex.run(Engine._convert_patterns_to_prompt(train_patterns))
-def get_first_regex(regex):
-    regex = regex.split('\n')
-    for x in regex:
-        if len(x.strip()) > 0:
-            return x
-regex = get_first_regex(regex)
-print(regex)
+result = chain.fix(
+    regex = '[1-5]',
+    correct_patterns = ['1', '2', '3'], 
+    incorrect_patterns = ['4', '5']
+)
+print(result)
+# regex = chain.inference(train_patterns)
+# print(regex)
+# chain.explain(regex)

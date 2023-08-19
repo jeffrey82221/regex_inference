@@ -194,43 +194,9 @@ Now, I will provide to you the other {cnt} facts.
     def _convert_patterns_to_prompt(patterns: List[str]) -> str:
         return '\n'.join(map(lambda x: f'"{x}"', patterns))
 
-    def _run_alter_regex(self, regex: str, patterns: List[str]) -> str:
-        for _ in range(self._max_iteration):
-            result = self._chain.alter_regex.run(
-                regex=regex,
-                strings=Engine._convert_patterns_to_prompt(patterns)
-            ).strip()
-            try:
-                re.compile(result)
-                break
-            except KeyboardInterrupt as e:
-                raise e
-            except BaseException:
-                pass
-        return result
-
-    def _run_simplify_regex(self, regex: str, patterns: List[str]) -> str:
-        for _ in range(self._max_iteration):
-            result = self._chain.simplify_regex.run(
-                regex=regex,
-                strings=Engine._convert_patterns_to_prompt(patterns)
-            ).strip()
-            try:
-                re.compile(result)
-                break
-            except KeyboardInterrupt as e:
-                raise e
-            except BaseException:
-                pass
-        return result
-
     def _run_new_inference(self, patterns: List[str]) -> str:
         for _ in range(self._max_iteration):
-            print('[start] chain.inference_regex')
-            result = self._chain.inference_regex.run(
-                Engine._convert_patterns_to_prompt(patterns)
-            ).strip()
-            print('[end] chain.inference_regex')
+            result = self._chain.inference(patterns)
             try:
                 re.compile(result)
                 break
@@ -240,7 +206,3 @@ Now, I will provide to you the other {cnt} facts.
                 if self._verbose:
                     print('result syntax error:', result)
         return result
-
-    def explain(self, regex: str) -> None:
-        result = self._chain.explain_regex.run(regex)
-        print(result)
