@@ -13,8 +13,13 @@ class Inference:
             self._n_thread = 30
         self._engine = Engine(*args, **kwargs)
 
-    def run(self, train_patterns: List[str], val_patterns: List[str]) -> str:
-        regex_list = self.get_regex_sequence(train_patterns, val_patterns)
+    def run(self, train_patterns: List[str],
+            val_patterns: List[str] = []) -> str:
+        if val_patterns:
+            regex_list = self.get_regex_sequence(train_patterns, val_patterns)
+        else:
+            regex_list = self.get_regex_sequence(
+                train_patterns, train_patterns)
         return Engine.merge_regex_sequence(regex_list)
 
     def get_regex_sequence(

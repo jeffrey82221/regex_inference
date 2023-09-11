@@ -1,4 +1,4 @@
-from regex_inference import Engine
+from regex_inference import Inference
 import time
 
 patterns = [
@@ -14,10 +14,9 @@ patterns = [
 ]
 
 if __name__ == '__main__':
-    e = Engine(verbose=True)
+    e = Inference(verbose=True)
     start = time.time()
     regex = e.run(patterns)
     end = time.time()
     print('run time =', end - start)
     print(regex)
-    e.explain(regex)
