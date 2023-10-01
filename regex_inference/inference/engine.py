@@ -2,8 +2,8 @@
 TODO:
 - [X] Evaluation Metrics Design
     - [X] F1-Score / Precision / Recall should work on whole Regex
+- [X] Add LLMChain to fix the regex with low F1 scores (done by iterative calling).
 - [ ] Consider continual inferencing mode: statistics should evaluate on the future cases.
-- [ ] Add LLMChain to fix the regex with low F1 scores.
 """
 import typing
 from typing import List, Optional, Dict

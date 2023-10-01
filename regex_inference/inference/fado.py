@@ -1,5 +1,5 @@
 """
-Rule-based Inference Engine via FAdo automata tool
+Inference Engine Mixing FAdo automata tool and AI
 """
 import re
 from typing import List

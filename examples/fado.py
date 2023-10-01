@@ -1,9 +1,9 @@
 """
 TODO:
-- [ ] More simplification:
+- [X] More simplification:
     - [X] Convert `Set` to `Range`
-    - [ ] Use ChatGPT to simplify the exact regex infered using FAdo
-    - [ ] Evaluate the regex
+    - [X] Use ChatGPT to simplify the exact regex infered using FAdo
+    - [X] Evaluate the regex
 """
 from regex_inference import Evaluator
 from typing import List

@@ -3,6 +3,9 @@ from typing import List
 
 
 class Filter:
+    """
+    Filter of patterns based on regex.
+    """
     @staticmethod
     def match(regex: str, patterns: List[str]) -> List[str]:
         try:

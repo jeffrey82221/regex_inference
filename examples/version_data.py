@@ -1,7 +1,7 @@
 """
 Evaluate Inference using Precision / Recall / F1 Given Different Train count
 """
-from regex_inference import Engine, Evaluator, Inference
+from regex_inference import Evaluator, Inference
 import random
 TRAIN_CNT = 200
 
