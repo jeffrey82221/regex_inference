@@ -1,12 +1,9 @@
 """
 TODO:
-- [ ] Evaluation Metrics Design
-    - [ ] F1-Score / Precision / Recall should work on whole Regex
-        - [ ] Precision's base is random generated strings.
-    - [ ] Using Accuracy to quantize the non-overlapping explainability of sub-regex.
-        - [ ] ((# correctly match of positive patterns) + (# correctly mismatch of negative patterns)) / (# all patterns)
+- [X] Evaluation Metrics Design
+    - [X] F1-Score / Precision / Recall should work on whole Regex
+- [X] Add LLMChain to fix the regex with low F1 scores (done by iterative calling).
 - [ ] Consider continual inferencing mode: statistics should evaluate on the future cases.
-- [ ] Add LLMChain to fix the regex with low F1 scores.
 """
 import typing
 from typing import List, Optional, Dict
@@ -32,6 +29,7 @@ class Engine:
     def _make_verbose(self):
         self.run = make_verbose(self.run)
         self._run_new_inference = make_verbose(self._run_new_inference)
+        self._run_simplify_regex = make_verbose(self._run_simplify_regex)
         self._fix_regex = make_verbose(self._fix_regex)
 
     @staticmethod
@@ -203,20 +201,20 @@ Now, I will provide to you the other {cnt} facts.
                 pass
         return result
 
-    def _run_simplify_regex(self, regex: str, patterns: List[str]) -> str:
+    def _run_simplify_regex(self, regex: str) -> str:
         for _ in range(self._max_iteration):
             result = self._chain.simplify_regex.run(
-                regex=regex,
-                strings=Engine._convert_patterns_to_prompt(patterns)
+                regex=regex
             ).strip()
             try:
                 re.compile(result)
-                break
+                return result
             except KeyboardInterrupt as e:
                 raise e
             except BaseException:
                 pass
-        return result
+        raise ValueError(
+            f'Unable to find simplified regex after {self._max_iteration} tries.')
 
     def _run_new_inference(self, patterns: List[str]) -> str:
         for _ in range(self._max_iteration):
@@ -225,12 +223,13 @@ Now, I will provide to you the other {cnt} facts.
             ).strip()
             try:
                 re.compile(result)
-                break
+                return result
             except KeyboardInterrupt as e:
                 raise e
             except BaseException:
                 pass
-        return result
+        raise ValueError(
+            f'Unable to find inferred regex after {self._max_iteration} tries.')
 
     def explain(self, regex: str) -> None:
         result = self._chain.explain_regex.run(regex)

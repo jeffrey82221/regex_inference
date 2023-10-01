@@ -4,6 +4,23 @@ from .inference import Engine
 
 
 class Evaluator:
+    """
+    Evaluate a regex against the ground truth patterns
+    """
+    @staticmethod
+    def evaluate(
+            regex: str, patterns: List[str]) -> Tuple[float, float, float]:
+        """
+        Args:
+            - regex: regex to be evaluated
+            - patterns: patterns to be matched by the regex
+        Returns:
+            - precision: describe how well the regex describe the patterns
+            - recall: describe how well the regex captures the patterns
+            - f1: combined score for precision and recall
+        """
+        return Evaluator.evaluate_regex_list([regex], patterns)
+
     @staticmethod
     def evaluate_regex_list(
             regex_list: List[str], patterns: List[str]) -> Tuple[float, float, float]:
@@ -19,7 +36,10 @@ class Evaluator:
 
         recall = Evaluator.recall(regex_list, patterns)
         precision = Evaluator.precision(regex_list, patterns)
-        f1 = 2. / (1. / precision + 1. / recall)
+        if recall == 0. or precision == 0.:
+            f1 = 0.
+        else:
+            f1 = 2. / (1. / precision + 1. / recall)
         return precision, recall, f1
 
     @staticmethod
