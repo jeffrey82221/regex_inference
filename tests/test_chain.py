@@ -34,12 +34,6 @@ def test_alter_regex(chain):
 
 def test_simplify_regex(chain):
     assert chain.simplify_regex.run(
-        regex='[0-3]|[0-9]',
-        strings=Engine._convert_patterns_to_prompt(
-            [
-                str(i) for i in range(10)])).strip() in ('[0-9]')
+        regex='[0-3]|[0-9]').strip() in ('[0-9]')
     assert chain.simplify_regex.run(
-        regex='[0-3]|[3-9]',
-        strings=Engine._convert_patterns_to_prompt(
-            [
-                str(i) for i in range(10)])).strip() in ('[0-9]')
+        regex='[0-3]|[3-9]').strip() in ('[0-9]')

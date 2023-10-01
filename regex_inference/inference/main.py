@@ -1,6 +1,7 @@
 from typing import List
 from threading import Thread
 from .engine import Engine
+from .fado import FAdoEngine
 from ..evaluator import Evaluator
 
 
@@ -10,8 +11,16 @@ class Inference:
             self._n_thread = kwargs['n_thread']
             del kwargs['n_thread']
         else:
-            self._n_thread = 30
-        self._engine = Engine(*args, **kwargs)
+            self._n_thread = 3
+        if 'engine' in kwargs:
+            if kwargs['engine'] == 'fado+ai':
+                del kwargs['engine']
+                self._engine = FAdoEngine(*args, **kwargs)
+            elif kwargs['engine'] == 'ai':
+                del kwargs['engine']
+                self._engine = Engine(*args, **kwargs)    
+        else:
+            self._engine = FAdoEngine(*args, **kwargs)
 
     def run(self, train_patterns: List[str],
             val_patterns: List[str] = []) -> str:
