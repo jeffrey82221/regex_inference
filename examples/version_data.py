@@ -49,7 +49,7 @@ if __name__ == '__main__':
     print('precision:', precision)
     print('recall:', recall)
     print('f1:', f1)
-    
+
 """
 #####################################################
 # Experiment 1: infer with different training count #

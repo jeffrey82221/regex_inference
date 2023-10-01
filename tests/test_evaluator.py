@@ -13,6 +13,7 @@ def train_patterns():
         '9'
     ]
 
+
 @pytest.fixture
 def test_patterns():
     return [
@@ -22,6 +23,7 @@ def test_patterns():
         '7'
     ]
 
+
 def test_evaluate(train_patterns, test_patterns):
     regex = FAdoEngine.infer_by_fado(train_patterns)
     assert Evaluator.evaluate(regex, train_patterns) == (1.0, 1.0, 1.0)
@@ -30,4 +32,4 @@ def test_evaluate(train_patterns, test_patterns):
     p, r, f = Evaluator.evaluate(regex, test_patterns)
     assert p > 0.5 and p <= 1
     assert r > 0.5 and r <= 1
-    assert f == 2. / ((1./ p) + (1./r))
+    assert f == 2. / ((1. / p) + (1. / r))

@@ -5,9 +5,10 @@ from .inference import Engine
 
 class Evaluator:
     @staticmethod
-    def evaluate(regex: str, patterns: List[str]) -> Tuple[float, float, float]:
+    def evaluate(
+            regex: str, patterns: List[str]) -> Tuple[float, float, float]:
         return Evaluator.evaluate_regex_list([regex], patterns)
-    
+
     @staticmethod
     def evaluate_regex_list(
             regex_list: List[str], patterns: List[str]) -> Tuple[float, float, float]:

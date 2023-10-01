@@ -123,7 +123,7 @@ if __name__ == '__main__':
     # Evaluate on Testing Data after generalized
     print('#Evaluate on Testing Data After Regex Simplified')
     refined_regex = Engine()._run_simplify_regex(standard_regex)
-    
+
     precision, recall, f1 = Evaluator.evaluate(
         refined_regex, test_inputs)
     print('precision:', precision)

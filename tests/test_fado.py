@@ -1,7 +1,8 @@
 
-import pytest 
+import pytest
 import re
 from regex_inference import FAdoEngine
+
 
 @pytest.fixture
 def patterns():
@@ -120,14 +121,16 @@ def patterns():
         "2017.1.0",
     ]
 
+
 @pytest.fixture
 def patterns_v1():
     return [
-        'apple', 
-        'apple2', 
-        'apple3', 
+        'apple',
+        'apple2',
+        'apple3',
         'apple4'
     ]
+
 
 @pytest.fixture
 def patterns_v2():
@@ -140,6 +143,7 @@ def patterns_v2():
         "中華文化",
         "   "
     ]
+
 
 @pytest.fixture
 def patterns_v3():
@@ -158,6 +162,7 @@ def test_run(patterns):
         check = re_com.fullmatch(pattern)
         assert check is not None, f'{pattern} does not fullmatch {regex}'
 
+
 def test_infer_by_fado(patterns_v1):
     e = FAdoEngine()
     regex = e.infer_by_fado(patterns_v1)
@@ -171,11 +176,12 @@ def test_infer_by_fado(patterns_v1):
 def test_infer_by_fado_v2(patterns_v2):
     e = FAdoEngine()
     regex = e.infer_by_fado(patterns_v2)
-    assert regex == '([09@]|中華文化|\ \ \ |123|apple)'
+    assert regex == '([09@]|中華文化|\\ \\ \\ |123|apple)'
     re_com = re.compile(regex)
     for pattern in patterns_v2:
         check = re_com.fullmatch(pattern)
         assert check is not None, f'{pattern} does not fullmatch {regex}'
+
 
 def test_infer_by_fado_v3(patterns_v3):
     e = FAdoEngine()
@@ -185,6 +191,3 @@ def test_infer_by_fado_v3(patterns_v3):
     for pattern in patterns_v3:
         check = re_com.fullmatch(pattern)
         assert check is not None, f'{pattern} does not fullmatch {regex}'
-
-        
-

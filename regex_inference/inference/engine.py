@@ -213,7 +213,8 @@ Now, I will provide to you the other {cnt} facts.
                 raise e
             except BaseException:
                 pass
-        raise ValueError(f'Unable to find simplified regex after {self._max_iteration} tries.')
+        raise ValueError(
+            f'Unable to find simplified regex after {self._max_iteration} tries.')
 
     def _run_new_inference(self, patterns: List[str]) -> str:
         for _ in range(self._max_iteration):
@@ -227,7 +228,8 @@ Now, I will provide to you the other {cnt} facts.
                 raise e
             except BaseException:
                 pass
-        raise ValueError(f'Unable to find inferred regex after {self._max_iteration} tries.')
+        raise ValueError(
+            f'Unable to find inferred regex after {self._max_iteration} tries.')
 
     def explain(self, regex: str) -> None:
         result = self._chain.explain_regex.run(regex)

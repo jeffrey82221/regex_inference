@@ -18,7 +18,7 @@ class Inference:
                 self._engine = FAdoEngine(*args, **kwargs)
             elif kwargs['engine'] == 'ai':
                 del kwargs['engine']
-                self._engine = Engine(*args, **kwargs)    
+                self._engine = Engine(*args, **kwargs)
         else:
             self._engine = FAdoEngine(*args, **kwargs)
 

@@ -12,10 +12,13 @@ from .filter import Filter
 
 
 __all__ = ['FAdoEngine']
+
+
 class FAdoEngine(Engine):
     """
     Engine that infer regex using both FAdo and ChatGPT.
     """
+
     def _run_new_inference(self, patterns: List[str]) -> str:
         for _ in range(self._max_iteration):
             regex = self.infer_by_fado(patterns)
@@ -36,12 +39,12 @@ class FAdoEngine(Engine):
         fado_regex = FA2regexpCG(minimal_dfa)
         standard_regex = FAdoEngine._to_simplied_standard_regex(fado_regex)
         return standard_regex
-    
+
     @staticmethod
     def _make_regex_union(inputs: List[str]) -> RegExp:
         fado_regex_list = map(FAdoEngine._convert_str_to_fado_regex, inputs)
         return reduce(lambda x, y: CDisj(x, y), fado_regex_list)
-    
+
     @staticmethod
     def _convert_str_to_fado_regex(input_str: str) -> CConcat:
         if input_str == '':
@@ -51,14 +54,14 @@ class FAdoEngine(Engine):
             for ch in input_str:
                 atoms.append(CAtom(escape(ch).regex))
             return reduce(lambda x, y: CConcat(x, y), atoms)
-    
+
     @staticmethod
     def _to_simplied_standard_regex(regex: RegExp):
         standard_regex = FAdoEngine._to_standard_regex(regex)
         standard_regex = reduce(lambda x, y: x.replace(
             *y), [standard_regex, *list(FAdoEngine._generate_digit_range())])
         return standard_regex
-    
+
     @staticmethod
     def _to_standard_regex(regex: RegExp) -> str:
         if isinstance(regex, CAtom):
@@ -73,13 +76,16 @@ class FAdoEngine(Engine):
             else:
                 return f'({regex})?'
         elif isinstance(regex, CConcat):
-            return FAdoEngine._to_standard_regex(regex.arg1) + FAdoEngine._to_standard_regex(regex.arg2)
+            return FAdoEngine._to_standard_regex(
+                regex.arg1) + FAdoEngine._to_standard_regex(regex.arg2)
         elif isinstance(regex, CDisj):
             if isinstance(regex.arg1, CEpsilon):
                 return FAdoEngine._to_standard_regex(COption(regex.arg2))
             if isinstance(regex.arg2, CEpsilon):
                 return FAdoEngine._to_standard_regex(COption(regex.arg1))
-            x1, x2 = FAdoEngine._to_standard_regex(regex.arg1), FAdoEngine._to_standard_regex(regex.arg2)
+            x1, x2 = FAdoEngine._to_standard_regex(
+                regex.arg1), FAdoEngine._to_standard_regex(
+                regex.arg2)
             if isinstance(regex.arg1, CAtom) and isinstance(regex.arg2, CAtom):
                 set_str = f'{x1}{x2}'
                 set_str = ''.join(sorted(set_str))
@@ -97,6 +103,7 @@ class FAdoEngine(Engine):
 
         elif isinstance(regex, CEpsilon):
             return '[]'
+
     @staticmethod
     def _generate_digit_range():
         for i in range(10):
