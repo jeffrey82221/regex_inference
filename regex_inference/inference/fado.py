@@ -63,7 +63,7 @@ class FAdoEngine(Engine):
         return standard_regex
 
     @staticmethod
-    def _to_standard_regex(regex: RegExp) -> Optional[str]:
+    def _to_standard_regex(regex: RegExp) -> str:
         if isinstance(regex, CAtom):
             return regex.val
         elif isinstance(regex, COption):
