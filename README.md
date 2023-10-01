@@ -9,7 +9,17 @@ You can install regex_inference using pip:
 ```bash
 pip install regex_inference
 ```
+# Obtain API key and add it to the environment
 
+
+1) Get an OpenAI api token following the link below:
+
+https://www.maisieai.com/help/how-to-get-an-openai-api-key-for-chatgpt
+
+2) Insert it as an environement variable. 
+```bash
+export OPENAI_API_KEY=<key>
+```
 # Basic Usage
 
 Here's a simple guide on how you can use regex_inference package:
