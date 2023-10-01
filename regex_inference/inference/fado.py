@@ -2,13 +2,12 @@
 Inference Engine Mixing FAdo automata tool and AI
 """
 import re
-from typing import List, Optional
+from typing import List
 from functools import reduce
 from regexfactory import escape
 from FAdo.reex import RegExp, CDisj, CAtom, CConcat, CEpsilon, COption
 from FAdo.conversions import FA2regexpCG
 from .engine import Engine
-from .filter import Filter
 
 
 __all__ = ['FAdoEngine']
