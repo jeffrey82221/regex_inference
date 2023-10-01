@@ -2,7 +2,7 @@
 Inference Engine Mixing FAdo automata tool and AI
 """
 import re
-from typing import List
+from typing import List, Optional
 from functools import reduce
 from regexfactory import escape
 from FAdo.reex import RegExp, CDisj, CAtom, CConcat, CEpsilon, COption
@@ -56,14 +56,14 @@ class FAdoEngine(Engine):
             return reduce(lambda x, y: CConcat(x, y), atoms)
 
     @staticmethod
-    def _to_simplied_standard_regex(regex: RegExp):
+    def _to_simplied_standard_regex(regex: RegExp) -> str:
         standard_regex = FAdoEngine._to_standard_regex(regex)
         standard_regex = reduce(lambda x, y: x.replace(
             *y), [standard_regex, *list(FAdoEngine._generate_digit_range())])
         return standard_regex
 
     @staticmethod
-    def _to_standard_regex(regex: RegExp) -> str:
+    def _to_standard_regex(regex: RegExp) -> Optional[str]:
         if isinstance(regex, CAtom):
             return regex.val
         elif isinstance(regex, COption):
@@ -103,6 +103,8 @@ class FAdoEngine(Engine):
 
         elif isinstance(regex, CEpsilon):
             return '[]'
+        else:
+            raise TypeError(f'type of regex: {type(regex)} cannot be handled')
 
     @staticmethod
     def _generate_digit_range():
