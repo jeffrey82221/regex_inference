@@ -18,14 +18,14 @@ You can install regex_inference using pip:
 ```bash
 pip install regex_inference
 ```
-# Obtain API key and add it to the environment
+# Add API key from OpenAI
 
 
-1) Get an OpenAI api token following the link below:
+1) You can get an OpenAI api key following the link below:
 
 https://www.maisieai.com/help/how-to-get-an-openai-api-key-for-chatgpt
 
-2) Insert it as an environement variable. 
+2) Then, simply insert it to your environement:
 ```bash
 export OPENAI_API_KEY=<key>
 ```
