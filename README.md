@@ -53,7 +53,7 @@ train_patterns = random.sample(whole_patterns, TRAIN_CNT)
 eval_patterns = list(set(whole_patterns) - set(train_patterns))
 
 # Initialize an Inference object
-inferencer = Inference(verbose=False, n_thread=1, engine='fado+ai')
+inferencer = Inference(verbose=False, n_thread=3, engine='fado+ai')
 
 # Generate a regex from a subset of the training patterns, with the rest used for validation
 regex = inferencer.run(train_patterns[:100], val_patterns=train_patterns[100:])
