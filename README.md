@@ -85,8 +85,6 @@ We welcome your contributions to `regex_inference`! Whether you're improving the
 
 If you have any questions, feature requests, or just want to chat, feel free to reach out to me at [jeffrey82221@gmail.com](mailto:jeffrey82221@gmail.com) or open an issue on our GitHub page.
 
-If you already have an MIT License file in your codebase, you can simply reference it in your README. Here's how you can do it:
-
 
 # License
 
