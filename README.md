@@ -18,16 +18,17 @@ You can install regex_inference using pip:
 ```bash
 pip install regex_inference
 ```
-# Add API key from OpenAI
+# Configuration
 
+## OpenAI API Key
 
-1) You can get an OpenAI api key following the link below:
+Before you start using `regex_inference`, you'll need to obtain an OpenAI API key. Here's how you can do it:
 
-https://www.maisieai.com/help/how-to-get-an-openai-api-key-for-chatgpt
+1. Follow the guide on this page to get your OpenAI API key: [How to get an OpenAI API Key for ChatGPT](https://www.maisieai.com/help/how-to-get-an-openai-api-key-for-chatgpt)
+2. Export the key to your environment:
 
-2) Then, simply insert it to your environement:
 ```bash
-export OPENAI_API_KEY=<key>
+export OPENAI_API_KEY=<your_key>
 ```
 
 # Getting Started with regex_inference
@@ -70,7 +71,11 @@ The `Inference` object is customizable. You can adjust the number of threads (`n
 
 The `fado+ai` engine minimizes a DFA (Deterministic Finite Automaton) of the training patterns, converts the DFA to a regex, and then uses ChatGPT to generalize to other similar patterns. The `ai` engine sends the training patterns directly to ChatGPT, asking it to produce a regex matching the patterns. The `fado+ai` approach is generally more economical than the `ai` approach, as it sends fewer tokens to ChatGPT.
 
-# Contribute
+# Contributing
 
-We welcome contributions to regex_inference. Whether it's improving the documentation, adding new features, reporting bugs, or any other improvements, we appreciate all kinds of contributions. 
+We welcome your contributions to `regex_inference`! Whether you're improving the documentation, adding new features, reporting bugs, or making other enhancements, your input is greatly appreciated. 
+
+# Contact
+
+If you have any questions, feature requests, or just want to chat, feel free to reach out to me at [jeffrey82221@gmail.com](mailto:jeffrey82221@gmail.com) or open an issue on our GitHub page.
 
