@@ -19,7 +19,10 @@ class Evaluator:
 
         recall = Evaluator.recall(regex_list, patterns)
         precision = Evaluator.precision(regex_list, patterns)
-        f1 = 2. / (1. / precision + 1. / recall)
+        if recall == 0. or precision == 0.:
+            f1 = 0.
+        else:
+            f1 = 2. / (1. / precision + 1. / recall)
         return precision, recall, f1
 
     @staticmethod
