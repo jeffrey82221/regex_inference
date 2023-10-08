@@ -24,12 +24,12 @@ class Engine:
         self._simpify_regex = simpify_regex
         if verbose:
             self._make_verbose()
+        self._verbose = verbose
 
     @typing.no_type_check
     def _make_verbose(self):
         self.run = make_verbose(self.run)
         self._run_new_inference = make_verbose(self._run_new_inference)
-        self._run_simplify_regex = make_verbose(self._run_simplify_regex)
         self._fix_regex = make_verbose(self._fix_regex)
 
     @staticmethod
@@ -185,36 +185,6 @@ Now, I will provide to you the other {cnt} facts.
     @staticmethod
     def _convert_patterns_to_prompt(patterns: List[str]) -> str:
         return '\n'.join(map(lambda x: f'"{x}"', patterns))
-
-    def _run_alter_regex(self, regex: str, patterns: List[str]) -> str:
-        for _ in range(self._max_iteration):
-            result = self._chain.alter_regex.run(
-                regex=regex,
-                strings=Engine._convert_patterns_to_prompt(patterns)
-            ).strip()
-            try:
-                re.compile(result)
-                break
-            except KeyboardInterrupt as e:
-                raise e
-            except BaseException:
-                pass
-        return result
-
-    def _run_simplify_regex(self, regex: str) -> str:
-        for _ in range(self._max_iteration):
-            result = self._chain.simplify_regex.run(
-                regex=regex
-            ).strip()
-            try:
-                re.compile(result)
-                return result
-            except KeyboardInterrupt as e:
-                raise e
-            except BaseException:
-                pass
-        raise ValueError(
-            f'Unable to find simplified regex after {self._max_iteration} tries.')
 
     def _run_new_inference(self, patterns: List[str]) -> str:
         for _ in range(self._max_iteration):

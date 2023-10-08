@@ -10,26 +10,18 @@ from FAdo.conversions import FA2regexpCG
 from .engine import Engine
 
 
-__all__ = ['FAdoEngine']
+__all__ = ['FAdoEngine', 'FAdoAIEngine']
 
 
 class FAdoEngine(Engine):
     """
-    Engine that infer regex using both FAdo and ChatGPT.
+    Engine that infer regex using solely FAdo.
     """
 
     def _run_new_inference(self, patterns: List[str]) -> str:
-        for _ in range(self._max_iteration):
-            regex = self.infer_by_fado(patterns)
-            result = self._run_simplify_regex(regex).strip()
-            try:
-                re.compile(result)
-                break
-            except KeyboardInterrupt as e:
-                raise e
-            except BaseException:
-                pass
-        return result
+        regex = FAdoEngine.infer_by_fado(patterns)
+        re.compile(regex)
+        return regex
 
     @staticmethod
     def infer_by_fado(inputs: List[str]) -> str:
@@ -114,3 +106,42 @@ class FAdoEngine(Engine):
                     yield f'[{content}]', '\\d'
                 else:
                     yield f'[{content}]', f'[{i}-{j}]'
+
+
+class FAdoAIEngine(FAdoEngine):
+    """
+    Engine that infer regex using both FAdo and ChatGPT
+    """
+
+    def _run_new_inference(self, patterns: List[str]) -> str:
+        regex = FAdoEngine.infer_by_fado(patterns)
+        if self._verbose:
+            print('[_run_new_inference] infered fado regex:', regex)
+        for _ in range(self._max_iteration):
+            result = self._run_simplify_regex(regex).strip()
+            try:
+                re.compile(result)
+                return result
+            except KeyboardInterrupt as e:
+                raise e
+            except BaseException:
+                if self._verbose:
+                    print('[_run_new_inference] regex not working:', result)
+                pass
+        raise ValueError(
+            f'Unable to find inferred regex after {self._max_iteration} tries.')
+
+    def _run_simplify_regex(self, regex: str) -> str:
+        for _ in range(self._max_iteration):
+            result = self._chain.simplify_regex.run(
+                regex=regex
+            ).strip()
+            try:
+                re.compile(result)
+                return result
+            except KeyboardInterrupt as e:
+                raise e
+            except BaseException:
+                pass
+        raise ValueError(
+            f'Unable to find simplified regex after {self._max_iteration} tries.')
