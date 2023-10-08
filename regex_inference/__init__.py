@@ -1,3 +1,3 @@
-from .inference import Engine, FAdoEngine, Inference
+from .inference import Engine, FAdoEngine, FAdoAIEngine, Inference
 from .evaluator import Evaluator
-__all__ = ['Engine', 'FAdoEngine', 'Evaluator', 'Inference']
+__all__ = ['Engine', 'FAdoEngine', 'FAdoAIEngine' , 'Evaluator', 'Inference']

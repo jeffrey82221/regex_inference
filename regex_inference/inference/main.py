@@ -1,7 +1,7 @@
 from typing import List
 from threading import Thread
 from .engine import Engine
-from .fado import FAdoEngine
+from .fado import FAdoEngine, FAdoAIEngine
 from ..evaluator import Evaluator
 
 
@@ -15,12 +15,15 @@ class Inference:
         if 'engine' in kwargs:
             if kwargs['engine'] == 'fado+ai':
                 del kwargs['engine']
-                self._engine = FAdoEngine(*args, **kwargs)
+                self._engine = FAdoAIEngine(*args, **kwargs)
             elif kwargs['engine'] == 'ai':
                 del kwargs['engine']
                 self._engine = Engine(*args, **kwargs)
+            elif kwargs['engine'] == 'fado':
+                del kwargs['engine']
+                self._engine = FAdoEngine(*args, **kwargs)
         else:
-            self._engine = FAdoEngine(*args, **kwargs)
+            self._engine = FAdoAIEngine(*args, **kwargs)
 
     def run(self, train_patterns: List[str],
             val_patterns: List[str] = []) -> str:
@@ -52,5 +55,6 @@ class Inference:
         for thread in threads:
             thread.join()
         results = [thread.value for thread in threads]
-        result = sorted(results, key=lambda x: x[0], reverse=True)[0][1]
+        sorted_results = sorted(results, key=lambda x: x[0], reverse=True)[0]
+        result = sorted_results[1]
         return result
