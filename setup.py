@@ -59,6 +59,7 @@ setuptools.setup(
         'langchain==0.0.253',
         'random_regex',
         'RegexFactory==1.0.0',
-        'fado==2.0.4'
+        'fado==2.0.4',
+        'more_itertools==8.14.0'
     ]
 )

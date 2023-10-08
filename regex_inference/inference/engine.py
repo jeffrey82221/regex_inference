@@ -186,7 +186,6 @@ Now, I will provide to you the other {cnt} facts.
     def _convert_patterns_to_prompt(patterns: List[str]) -> str:
         return '\n'.join(map(lambda x: f'"{x}"', patterns))
 
-
     def _run_new_inference(self, patterns: List[str]) -> str:
         for _ in range(self._max_iteration):
             result = self._chain.inference_regex.run(

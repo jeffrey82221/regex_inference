@@ -33,4 +33,3 @@ def test_evaluate(train_patterns, test_patterns):
     assert p > 0.5 and p <= 1
     assert r > 0.5 and r <= 1
     assert f == 2. / ((1. / p) + (1. / r))
-    

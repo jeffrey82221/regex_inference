@@ -3,34 +3,85 @@ Evaluate Inference using Precision / Recall / F1 Given Different Train count
 
 https://github.com/shibing624/addressparser/blob/master/tests/addr.csv
 
-TODO: 
-- [ ] Add setting of cross validation to help enhance performance for many fold.
-- [ ] Add cache for same input to infer_by_fado
+TODO:
+- [X] Add setting of cross validation to help enhance performance for many fold.
+- [ ] Enable reduce of infer_by_fado output do avoid simplify by chatGPT not working
 - [ ] Enable multi-processing for infer_by_fado
 """
 from regex_inference import Evaluator, Inference
 import random
 
-def do_experiment(data_path, train_cnt, engine, n_thread):
-    whole_patterns = []
-    with open(data_path, 'r') as f:
-        whole_patterns = f.read().split('\n')
-    train_patterns = random.sample(whole_patterns, train_cnt)
-    eval_patterns = list(set(whole_patterns) - set(train_patterns))
-    print(f'{engine} engine with {n_thread} thread on dataset {data_path}')
-    inferencer = Inference(verbose=False, n_thread=n_thread, engine=engine, max_iteration=9)
-    regex = inferencer.run(
-        train_patterns[:len(train_patterns)//2], val_patterns=train_patterns[len(train_patterns)//2:])
+
+def do_experiment(train_patterns, eval_patterns, engine,
+                  n_thread, cross_validation=True):
+
+    print(f'{engine} engine with {n_thread} thread')
+    inferencer = Inference(verbose=False, engine=engine, max_iteration=5)
+    if cross_validation:
+        regex = inferencer.run(
+            train_patterns, n_fold=n_thread, train_rate=0.1)
+    else:
+        train = random.sample(train_patterns, int(len(train_patterns) * 0.1))
+        val = list(set(train_patterns) - set(train))
+        regex = inferencer.run(
+            train, val_patterns=val, n_fold=n_thread)
     precision, recall, f1 = Evaluator.evaluate(
         regex, eval_patterns)
     print('f1:', f1)
 
+
 if __name__ == '__main__':
-    do_experiment('data/version.txt', 100, 'ai', 9)
-    do_experiment('data/version.txt', 100, 'fado+ai', 9)
-    do_experiment('data/address.txt', 100, 'ai', 9)
-    do_experiment('data/address.txt', 100, 'fado+ai', 9)
-    
+    train_cnt = 100
+    print('version.txt')
+    whole_patterns = []
+    data_path = 'data/version.txt'
+    with open(data_path, 'r') as f:
+        whole_patterns = f.read().split('\n')
+    train_patterns = random.sample(whole_patterns, train_cnt)
+    eval_patterns = list(set(whole_patterns) - set(train_patterns))
+    cross_validation = True
+    print('cross validation: True')
+    do_experiment(train_patterns, eval_patterns, 'ai', 9, cross_validation)
+    do_experiment(
+        train_patterns,
+        eval_patterns,
+        'fado+ai',
+        9,
+        cross_validation)
+    cross_validation = False
+    print('cross validation: False')
+    do_experiment(train_patterns, eval_patterns, 'ai', 9, cross_validation)
+    do_experiment(
+        train_patterns,
+        eval_patterns,
+        'fado+ai',
+        9,
+        cross_validation)
+    print('address.txt')
+    data_path = 'data/address.txt'
+    with open(data_path, 'r') as f:
+        whole_patterns = f.read().split('\n')
+    train_patterns = random.sample(whole_patterns, train_cnt)
+    eval_patterns = list(set(whole_patterns) - set(train_patterns))
+    cross_validation = True
+    print('cross validation: True')
+    do_experiment(train_patterns, eval_patterns, 'ai', 9, cross_validation)
+    do_experiment(
+        train_patterns,
+        eval_patterns,
+        'fado+ai',
+        9,
+        cross_validation)
+    cross_validation = False
+    print('cross validation: False')
+    do_experiment(train_patterns, eval_patterns, 'ai', 9, cross_validation)
+    do_experiment(
+        train_patterns,
+        eval_patterns,
+        'fado+ai',
+        9,
+        cross_validation)
+
 
 """
 #####################################################
@@ -180,7 +231,7 @@ f1: 0.8852559674572108
 FAdoEngine with 9 thread
 f1: 0.9806002414441731
 
-# address.txt 
+# address.txt
 
 TRAIN_CNT = 10
 FAdoEngine with 1 thread
@@ -231,14 +282,50 @@ f1: 0.657487091222031
 # Experiment 4: Compare FAdo and Pure AI Approach on high train count and thread cnt  #
 #######################################################################################
 
+
+First time:
+
+
+No cross validation:
+
 ai engine with 9 thread on dataset data/version.txt
-f1: 0.9708049886621315
+f1: 0.9669044222539231
 fado+ai engine with 9 thread on dataset data/version.txt
-f1: 0.8225756765082609
-
+f1: 0.889127500306786
 ai engine with 9 thread on dataset data/address.txt
-f1: 0.9975903614457832
+f1: 0.9965110483469014
 fado+ai engine with 9 thread on dataset data/address.txt
-f1: 0.8664850136239781
+f1: 0.6149965604219216
 
+With cross validation:
+
+ai engine with 9 thread on dataset data/version.txt
+f1: 0.929062597045384
+fado+ai engine with 9 thread on dataset data/version.txt
+f1: 0.9643041015960185
+ai engine with 9 thread on dataset data/address.txt
+f1: 0.951570907828502
+fado+ai engine with 9 thread on dataset data/address.txt
+f1: 0.9288881007270793
+
+
+Second Time:
+
+No cross validation:
+
+
+With cross validation:
+
+ai engine with 9 thread on dataset data/version.txt
+f1: 0.978723404255319
+fado+ai engine with 9 thread on dataset data/version.txt
+f1: 0.9052314640572073
+ai engine with 9 thread on dataset data/address.txt
+f1: 0.9223185449600544
+fado+ai engine with 9 thread on dataset data/address.txt
+f1: 0.798559787758196
+ai engine with 9 thread on dataset data/version.txt
+
+
+=> cross validation dramatically increase the fado+ai method
 """

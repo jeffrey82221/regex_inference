@@ -11,16 +11,18 @@ from .engine import Engine
 
 
 __all__ = ['FAdoEngine', 'FAdoAIEngine']
-    
+
+
 class FAdoEngine(Engine):
     """
     Engine that infer regex using solely FAdo.
     """
+
     def _run_new_inference(self, patterns: List[str]) -> str:
         regex = FAdoEngine.infer_by_fado(patterns)
         re.compile(regex)
         return regex
-    
+
     @staticmethod
     def infer_by_fado(inputs: List[str]) -> str:
         union_regex = FAdoEngine._make_regex_union(inputs)
@@ -105,10 +107,12 @@ class FAdoEngine(Engine):
                 else:
                     yield f'[{content}]', f'[{i}-{j}]'
 
+
 class FAdoAIEngine(FAdoEngine):
     """
     Engine that infer regex using both FAdo and ChatGPT
     """
+
     def _run_new_inference(self, patterns: List[str]) -> str:
         regex = FAdoEngine.infer_by_fado(patterns)
         if self._verbose:
