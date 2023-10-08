@@ -153,7 +153,7 @@ def test_run_by_pure_ai(train_abc, train_complex, train_versions):
 def test_run_by_fado_ai(train_versions):
     for i, train in enumerate([train_versions]):
         inf = Inference(temperature=0.8, engine='fado+ai')
-        regex = inf.run(train, n_fold=3, train_rate=0.8)
+        regex = inf.run(train, n_fold=12, train_rate=0.2)
         assert re.compile(regex)
         precision, recall, f1 = Evaluator.evaluate(regex, train)
         assert f1 > 0.8

@@ -1,10 +1,40 @@
 from typing import List
 from threading import Thread
+# from multiprocessing import Process as Thread
 from more_itertools import chunked
 import random
 from .engine import Engine
 from .fado import FAdoEngine, FAdoAIEngine
 from ..evaluator import Evaluator
+
+__all__ = ['Inference']
+
+
+class Candidate(Thread):
+    def __init__(self, engine, train_patterns, val_patterns):
+        Thread.__init__(self)
+        self.value = None
+        self._engine = engine
+        self._train_patterns = train_patterns
+        self._val_patterns = val_patterns
+
+    def run(self):
+        regex_list = self._engine.get_regex_sequence(
+            self._train_patterns)
+        _, _, f1 = Evaluator.evaluate_regex_list(
+            regex_list, self._val_patterns)
+        self.value = (f1, regex_list)
+
+    @staticmethod
+    def get_best(candidates: List['Candidate']) -> str:
+        for thread in candidates:
+            thread.start()
+        for thread in candidates:
+            thread.join()
+        regex_list = [thread.value for thread in candidates]
+        sorted_results = sorted(regex_list, key=lambda x: x[0], reverse=True)
+        regex_list = sorted_results[0][1]
+        return Engine.merge_regex_sequence(regex_list)
 
 
 class Inference:
@@ -48,71 +78,36 @@ class Inference:
 
     def _infer_with_fix_val_patterns(
             self, train_patterns: List[str], val_patterns: List[str], n_fold: int) -> str:
-        class GetThread(Thread):
-            def __init__(self, engine):
-                Thread.__init__(self)
-                self.value = None
-                self._engine = engine
-
-            def run(self):
-                regex_list = self._engine.get_regex_sequence(train_patterns)
-                _, _, f1 = Evaluator.evaluate_regex_list(
-                    regex_list, val_patterns)
-                self.value = (f1, regex_list)
-        threads = []
+        candidates = []
         for _ in range(n_fold):
-            thread = GetThread(self._engine)
-            threads.append(thread)
-            thread.start()
-        for thread in threads:
-            thread.join()
-        regex_list = [thread.value for thread in threads]
-        if self._verbose:
-            print('regex_list candidates:', regex_list)
-        sorted_results = sorted(regex_list, key=lambda x: x[0], reverse=True)
-        regex_list = sorted_results[0][1]
-        return Engine.merge_regex_sequence(regex_list)
+            candidate = Candidate(self._engine, train_patterns, val_patterns)
+            candidates.append(candidate)
+        return Candidate.get_best(candidates)
 
     def _infer_with_cross_val_patterns(
             self, train_patterns: List[str], n_fold: int, total_train_rate: float) -> str:
-        class GetThread(Thread):
-            def __init__(self, engine, train_patterns, val_patterns):
-                Thread.__init__(self)
-                self.value = None
-                self._engine = engine
-                self._train_patterns = train_patterns
-                self._val_patterns = val_patterns
-
-            def run(self):
-                regex_list = self._engine.get_regex_sequence(
-                    self._train_patterns)
-                _, _, f1 = Evaluator.evaluate_regex_list(
-                    regex_list, self._val_patterns)
-                self.value = (f1, regex_list)
-
         selected_train_count = int(len(train_patterns) * total_train_rate)
-        if selected_train_count <= len(train_patterns):
+        train_buckets = Inference._get_train_buckets(
+            train_patterns, selected_train_count, n_fold)
+        candidates = []
+        for i in range(n_fold):
+            val_bucket = list(set(train_patterns) - set(train_buckets[i]))
+            candidate = Candidate(self._engine, train_buckets[i], val_bucket)
+            candidates.append(candidate)
+        return Candidate.get_best(candidates)
+
+    @staticmethod
+    def _get_train_buckets(
+            train_patterns: List[str], bucket_size: int, n_fold: int) -> List[List[str]]:
+        if bucket_size <= len(train_patterns):
             train_selected = random.sample(
-                train_patterns, selected_train_count)
+                train_patterns, bucket_size)
         else:
             train_selected = random.choices(
-                train_patterns, k=selected_train_count)
+                train_patterns, k=bucket_size)
         train_buckets = list(
             chunked(
                 train_selected,
-                selected_train_count //
+                bucket_size //
                 n_fold))
-        threads = []
-        for i in range(n_fold):
-            val_bucket = list(set(train_patterns) - set(train_buckets[i]))
-            thread = GetThread(self._engine, train_buckets[i], val_bucket)
-            threads.append(thread)
-            thread.start()
-        for thread in threads:
-            thread.join()
-        regex_list = [thread.value for thread in threads]
-        if self._verbose:
-            print('regex_list candidates:', regex_list)
-        sorted_results = sorted(regex_list, key=lambda x: x[0], reverse=True)
-        regex_list = sorted_results[0][1]
-        return Engine.merge_regex_sequence(regex_list)
+        return train_buckets
