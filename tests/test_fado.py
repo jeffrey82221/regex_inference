@@ -15,7 +15,6 @@ def patterns_v1():
     ]
 
 
-
 @pytest.fixture
 def patterns_v3():
     return [
@@ -23,6 +22,7 @@ def patterns_v3():
         "9",
         ""
     ]
+
 
 def test_run(versions, addresses):
     for patterns in [versions, addresses]:

@@ -65,15 +65,15 @@ class Engine:
                 pass
         raise ValueError(
             f'Unable to find inferred regex after {self._max_iteration} tries.')
-    
+
     @staticmethod
     def _convert_patterns_to_prompt(patterns: List[str]) -> str:
         return '\n'.join(map(lambda x: f'"{x}"', patterns))
-    
+
     @staticmethod
     def merge_regex_sequence(regex_list: List[str]) -> str:
         return '|'.join(map(lambda x: f'({x})', regex_list))
-    
+
     def explain(self, regex: str) -> None:
         result = self._chain.explain_regex.run(regex)
         print(result)
@@ -107,10 +107,10 @@ class Engine:
                 'incorrect': incorrect_patterns
             }
         return result
-    
+
     @staticmethod
     def divide_patterns(regex_list: List[str],
-                         patterns: List[str]) -> List[List[str]]:
+                        patterns: List[str]) -> List[List[str]]:
         """
         Seperate a list of patterns to match the regex in regex_list
         """

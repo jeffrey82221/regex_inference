@@ -4,9 +4,11 @@ from regex_inference import Inference
 from regex_inference import Evaluator
 from tests.fixture import train_complex, versions_slim
 
+
 @pytest.fixture
 def train_abc():
     return ['a', 'b', 'c']
+
 
 def test_run_by_pure_ai(train_abc, train_complex):
     for train in [train_abc, train_complex]:
