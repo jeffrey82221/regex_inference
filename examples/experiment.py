@@ -35,7 +35,7 @@ if __name__ == '__main__':
     train_cnt = 100
     print('version.txt')
     whole_patterns = []
-    data_path = 'data/version.txt'
+    data_path = '../tests/data/version.txt'
     with open(data_path, 'r') as f:
         whole_patterns = f.read().split('\n')
     train_patterns = random.sample(whole_patterns, train_cnt)
@@ -57,7 +57,7 @@ if __name__ == '__main__':
         9,
         cross_validation)
     print('address.txt')
-    data_path = 'data/address.txt'
+    data_path = '../tests/data/address.txt'
     with open(data_path, 'r') as f:
         whole_patterns = f.read().split('\n')
     train_patterns = random.sample(whole_patterns, train_cnt)

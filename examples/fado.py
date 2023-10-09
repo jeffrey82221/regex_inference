@@ -10,7 +10,7 @@ from typing import List
 from functools import reduce
 import exrex
 import random
-from regex_inference import Engine
+from regex_inference import FAdoAIEngine
 from regexfactory import escape
 from FAdo.reex import CAtom, CConcat, CDisj, RegExp, CEpsilon, COption
 from FAdo.conversions import FA2regexpCG
@@ -92,7 +92,7 @@ def infer_regex_from_patterns(inputs: List[str]) -> str:
 if __name__ == '__main__':
     # Take Inputs
     inputs = []
-    with open('data/version.txt') as f:
+    with open('../tests/data/version.txt') as f:
         inputs = list(map(lambda x: x.replace('\n', ''), f))
     train_inputs = random.choices(inputs, k=200)
     test_inputs = list(set(inputs) - set(train_inputs))
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     print('f1:', f1)
     # Evaluate on Testing Data after generalized
     print('#Evaluate on Testing Data After Regex Simplified')
-    refined_regex = Engine()._run_simplify_regex(standard_regex)
+    refined_regex = FAdoAIEngine()._run_simplify_regex(standard_regex)
 
     precision, recall, f1 = Evaluator.evaluate(
         refined_regex, test_inputs)
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     print('recall:', recall)
     print('f1:', f1)
     print('#Evaluate on Testing Data After Regex Simplified 2nd time')
-    refined_regex = Engine()._run_simplify_regex(refined_regex)
+    refined_regex = FAdoAIEngine()._run_simplify_regex(refined_regex)
     # Evaluate on Testing Data after generalized
     precision, recall, f1 = Evaluator.evaluate(
         refined_regex, test_inputs)
