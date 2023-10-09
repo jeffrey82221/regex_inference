@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Iterator
 from threading import Thread
 # from multiprocessing import Process as Thread
 from multiprocessing import Queue
@@ -64,6 +64,7 @@ class Inference:
             self._verbose = kwargs['verbose']
         else:
             self._verbose = False
+        self._regex_candidate = []
 
     def run(self, train_patterns: List[str],
             val_patterns: List[str] = [], n_fold: int = 10, train_rate: float = 1.) -> str:
@@ -84,6 +85,22 @@ class Inference:
             regex = self._infer_with_cross_val_patterns(
                 train_patterns, n_fold=n_fold, total_train_rate=train_rate * n_fold)
         return regex
+    
+    def process_batch(self, train_batch: List[str], n_fold: int = 10, train_rate: float = 1.):
+        """
+        TODO:
+        - [ ] Build procedure 
+            - [ ] Step1: select `train_rate` percentage of instances from train_batch.
+                - [ ] If len(candidates) == 0: select randomly
+                - [ ] Else: select by low f1 with high f1-std
+            - [ ] Step2: Do _run_new_inference `n_fold` times (procedure similar to self._infer_with_cross_val_patterns), 
+                    keep the resulting candidates.  
+            - [ ] Step3: Get all combination of regex concate from the old candidates and new candidates.
+            - [ ] Step4: Calculate the F1 scores of all regex concates, retain the top `n_fold` onces as new candidates and drop the rest.
+        - [ ] Build new class `ContinuousInference`.
+        - [ ] Add method: `get_regex` and `process_batch`.
+        """
+        
 
     def _infer_with_fix_val_patterns(
             self, train_patterns: List[str], val_patterns: List[str], n_fold: int) -> str:
@@ -95,7 +112,9 @@ class Inference:
                 val_patterns,
                 Queue())
             candidates.append(candidate)
-        return Candidate.get_best(candidates)
+        result = Candidate.get_best(candidates)
+        self._regex_candidate = [Candidate.get_value(e)[1] for e in candidates]
+        return result
 
     def _infer_with_cross_val_patterns(
             self, train_patterns: List[str], n_fold: int, total_train_rate: float) -> str:
@@ -111,7 +130,9 @@ class Inference:
                 val_bucket,
                 Queue())
             candidates.append(candidate)
-        return Candidate.get_best(candidates)
+        result = Candidate.get_best(candidates)
+        self._regex_candidate = [Candidate.get_value(e)[1] for e in candidates]
+        return result
 
     @staticmethod
     def _get_train_buckets(
