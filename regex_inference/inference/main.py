@@ -36,8 +36,7 @@ class Candidate(Thread):
             worker.join()
         regex_list = [Candidate.get_value(worker) for worker in candidates]
         sorted_results = sorted(regex_list, key=lambda x: x[0], reverse=True)
-        regex_list = sorted_results[0][1]
-        return Engine.merge_regex_sequence(regex_list)
+        return Engine.merge_regex_sequence(sorted_results[0][1])
 
     @staticmethod
     def get_value(candidate) -> Tuple[float, List[str]]:
