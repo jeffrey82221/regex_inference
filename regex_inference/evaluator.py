@@ -44,12 +44,12 @@ class Evaluator:
 
     @staticmethod
     def precision(regex_list: List[str], patterns: List[str]) -> float:
-        divided_patterns = Engine._divide_patterns(regex_list, patterns)
+        divided_patterns = Engine.divide_patterns(regex_list, patterns)
         precisions = []
         for i in range(len(divided_patterns)):
             negative_patterns = Evaluator._collect_negative_patterns(
                 i, divided_patterns)
-            precision = Evaluator.regex_precision(
+            precision = Evaluator._regex_precision(
                 regex_list[i], divided_patterns[i], negative_patterns)
             precisions.append(precision)
         precision = sum(precisions) / len(precisions)
@@ -77,7 +77,7 @@ class Evaluator:
         return negative_patterns
 
     @staticmethod
-    def regex_precision(
+    def _regex_precision(
             sub_regex: str, positive_patterns: List[str], negative_patterns: List[str]) -> float:
         """
         Precision evaluate how precise or explainable is the regex on the target patterns.

@@ -5,8 +5,9 @@ https://github.com/shibing624/addressparser/blob/master/tests/addr.csv
 
 TODO:
 - [X] Add setting of cross validation to help enhance performance for many fold.
+- [X] Enable multi-processing for infer_by_fado
 - [ ] Enable reduce of infer_by_fado output do avoid simplify by chatGPT not working
-- [ ] Enable multi-processing for infer_by_fado
+
 """
 from regex_inference import Evaluator, Inference
 import random
@@ -34,14 +35,13 @@ if __name__ == '__main__':
     train_cnt = 100
     print('version.txt')
     whole_patterns = []
-    data_path = 'data/version.txt'
+    data_path = '../tests/data/version.txt'
     with open(data_path, 'r') as f:
         whole_patterns = f.read().split('\n')
     train_patterns = random.sample(whole_patterns, train_cnt)
     eval_patterns = list(set(whole_patterns) - set(train_patterns))
     cross_validation = True
     print('cross validation: True')
-    do_experiment(train_patterns, eval_patterns, 'ai', 9, cross_validation)
     do_experiment(
         train_patterns,
         eval_patterns,
@@ -50,7 +50,6 @@ if __name__ == '__main__':
         cross_validation)
     cross_validation = False
     print('cross validation: False')
-    do_experiment(train_patterns, eval_patterns, 'ai', 9, cross_validation)
     do_experiment(
         train_patterns,
         eval_patterns,
@@ -58,14 +57,13 @@ if __name__ == '__main__':
         9,
         cross_validation)
     print('address.txt')
-    data_path = 'data/address.txt'
+    data_path = '../tests/data/address.txt'
     with open(data_path, 'r') as f:
         whole_patterns = f.read().split('\n')
     train_patterns = random.sample(whole_patterns, train_cnt)
     eval_patterns = list(set(whole_patterns) - set(train_patterns))
     cross_validation = True
     print('cross validation: True')
-    do_experiment(train_patterns, eval_patterns, 'ai', 9, cross_validation)
     do_experiment(
         train_patterns,
         eval_patterns,
@@ -74,7 +72,6 @@ if __name__ == '__main__':
         cross_validation)
     cross_validation = False
     print('cross validation: False')
-    do_experiment(train_patterns, eval_patterns, 'ai', 9, cross_validation)
     do_experiment(
         train_patterns,
         eval_patterns,
