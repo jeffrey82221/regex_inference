@@ -17,6 +17,25 @@ Here are some of the cool features you can expect:
 
 Whether you're a machine learning enthusiast, a data scientist, or a Python dev looking to further leverage the power of regex, regex_inference is here to make your life easier. We look forward to seeing the amazing things you'll do with this tool!
 
+Sure, here's how you might address those questions in your README:
+
+
+## Why leverage ChatGPT for regex inference?
+
+Traditional rule-based methods for regex inference rely on predefined rules and patterns, which can be limiting. These methods may struggle with complex or unusual cases and are often not very flexible. 
+
+On the other hand, ChatGPT is a transformer-based language model trained on a diverse range of internet text. Its ability to predict the next word in a sentence can be adapted for our purpose of predicting the next character in a regex pattern. This makes it incredibly versatile and capable of handling a wider range of patterns compared to rule-based methods.
+
+In addition, using ChatGPT allows `regex_inference` to leverage the model's understanding of semantics and context. This means our package can generate regex patterns that not only match the strings provided but also capture the underlying pattern in a way that is meaningful and intuitive for humans.
+
+## Use Cases and Benefits for Data-Related Industries
+
+Regular expressions are a powerful tool for working with text data. They can be used for tasks like data extraction, data cleaning, and data validation. However, writing regex patterns can be complex and time-consuming, especially for those who are not familiar with regex syntax.
+
+`regex_inference` can be a game changer in such scenarios. By automating the process of regex generation, it allows data scientists, analysts, and other professionals to focus on their core work without getting bogged down in the intricacies of regex syntax. This can lead to significant time savings and productivity improvements.
+
+Consider a scenario where a company receives large amounts of text data in various formats and needs to extract specific information from this data. Instead of manually writing and tweaking regex patterns, they could use `regex_inference` to generate the necessary patterns automatically. This not only simplifies the task but also makes the process more reliable and repeatable.
+
 # Installation 
 
 You can install regex_inference using pip:
