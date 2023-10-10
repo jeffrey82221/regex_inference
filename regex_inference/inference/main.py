@@ -95,6 +95,7 @@ class Inference:
             - [ ] `get_regex_candidates` (get regex list from the hold candidates)
             - [ ] `join` enable combine of two set of candidates
             - [ ] `drop_bad_regex` (with number and metric variables guiding the drop)
+            - [ ] `sort_patterns_by_confidence` (with confidence metrics for ordering the patterns)
         - [ ] Feature: add with get_openai_callback() as cb: for recording the price statistics. 
             - [ ] get_chatgpt_summary: https://python.langchain.com/docs/modules/model_io/models/llms/token_usage_tracking
                 cb.total_tokens
