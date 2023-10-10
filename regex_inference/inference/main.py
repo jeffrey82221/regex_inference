@@ -3,6 +3,7 @@ from threading import Thread
 # from multiprocessing import Process as Thread
 from multiprocessing import Queue
 from more_itertools import chunked
+from langchain.callbacks import get_openai_callback
 import random
 from .engine import Engine
 from .fado import FAdoEngine, FAdoAIEngine
@@ -89,7 +90,19 @@ class Inference:
     def process_batch(self, train_batch: List[str], n_fold: int = 10, train_rate: float = 1.):
         """
         TODO:
-        - [ ] Build procedure 
+        - [ ] Refactor: build class `CandidateRecords` for holding candidates related data with following methods:
+            - [ ] `get_best_regex` (with metrics for ordering as variables)
+            - [ ] `get_regex_candidates` (get regex list from the hold candidates)
+            - [ ] `join` enable combine of two set of candidates
+            - [ ] `drop_bad_regex` (with number and metric variables guiding the drop)
+        - [ ] Feature: add with get_openai_callback() as cb: for recording the price statistics. 
+            - [ ] get_chatgpt_summary: https://python.langchain.com/docs/modules/model_io/models/llms/token_usage_tracking
+                cb.total_tokens
+                cb.prompt_tokens
+                cb.completion_tokens
+                cb.total_cost
+        - [ ] Experiment: compare price usage and f1 result between `ai` and `fado+ai` approach. 
+        - [ ] Feature: Build new class `ContinuousInference` with `run` procedure: 
             - [ ] Step1: select `train_rate` percentage of instances from train_batch.
                 - [ ] If len(candidates) == 0: select randomly
                 - [ ] Else: select by low f1 with high f1-std
@@ -97,8 +110,6 @@ class Inference:
                     keep the resulting candidates.  
             - [ ] Step3: Get all combination of regex concate from the old candidates and new candidates.
             - [ ] Step4: Calculate the F1 scores of all regex concates, retain the top `n_fold` onces as new candidates and drop the rest.
-        - [ ] Build new class `ContinuousInference`.
-        - [ ] Add method: `get_regex` and `process_batch`.
         """
         
 
