@@ -28,7 +28,7 @@ On the other hand, ChatGPT is a transformer-based language model trained on a di
 
 In addition, using ChatGPT allows `regex_inference` to leverage the model's understanding of semantics and context. This means our package can generate regex patterns that not only match the strings provided but also capture the underlying pattern in a way that is meaningful and intuitive for humans.
 
-## Use Cases and Benefits for Data-Related Industries
+## Use Cases in Data-Related Industries
 
 Regular expressions are a powerful tool for working with text data. They can be used for tasks like data extraction, data cleaning, and data validation. However, writing regex patterns can be complex and time-consuming, especially for those who are not familiar with regex syntax.
 
