@@ -90,23 +90,23 @@ class Inference:
     def process_batch(self, train_batch: List[str], n_fold: int = 10, train_rate: float = 1.):
         """
         TODO:
-        - [ ] Refactor: build class `CandidateRecords` for holding candidates related data with following methods:
+        - [ ] Refactor: Build class `CandidateRecords` for holding candidates related data with following methods:
             - [ ] `get_best_regex` (with metrics for ordering as variables)
             - [ ] `get_regex_candidates` (get regex list from the hold candidates)
             - [ ] `join` enable combine of two set of candidates
             - [ ] `drop_bad_regex` (with number and metric variables guiding the drop)
             - [ ] `sort_patterns_by_confidence` (with confidence metrics for ordering the patterns)
-        - [ ] Feature: add with get_openai_callback() as cb: for recording the price statistics. 
+        - [ ] Feature: Add with get_openai_callback() as cb: for recording the price statistics. 
             - [ ] get_chatgpt_summary: https://python.langchain.com/docs/modules/model_io/models/llms/token_usage_tracking
                 cb.total_tokens
                 cb.prompt_tokens
                 cb.completion_tokens
                 cb.total_cost
-        - [ ] Experiment: compare price usage and f1 result between `ai` and `fado+ai` approach. 
+        - [ ] Experiment: Compare price usage and f1 result between `ai` and `fado+ai` approach. 
         - [ ] Feature: Build new class `ContinuousInference` with `run` procedure: 
-            - [ ] Step1: select `train_rate` percentage of instances from train_batch.
+            - [ ] Step1: Select `train_rate` percentage of instances from train_batch.
                 - [ ] If len(candidates) == 0: select randomly
-                - [ ] Else: select by low f1 with high f1-std
+                - [ ] Else: Select by low f1 with high f1-std
             - [ ] Step2: Do _run_new_inference `n_fold` times (procedure similar to self._infer_with_cross_val_patterns), 
                     keep the resulting candidates.  
             - [ ] Step3: Get all combination of regex concate from the old candidates and new candidates.
