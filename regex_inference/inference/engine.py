@@ -72,7 +72,12 @@ class Engine:
 
     @staticmethod
     def merge_regex_sequence(regex_list: List[str]) -> str:
-        return '|'.join(map(lambda x: f'({x})', regex_list))
+        if len(regex_list) > 1:
+            return '|'.join(map(lambda x: f'({x})', regex_list))
+        elif len(regex_list) == 1:
+            return regex_list[0]
+        else:
+            return ''
 
     def explain(self, regex: str) -> None:
         result = self._chain.explain_regex.run(regex)
