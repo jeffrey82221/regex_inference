@@ -10,14 +10,14 @@ class Candidate(Thread):
     """
     Generate a candidate using inference engine
     """
-    def __init__(self, engine: Engine, train_patterns: List[str], val_patterns: List[str], queue: Queue = Queue()):
+    def __init__(self, engine: Optional[Engine], train_patterns: List[str], val_patterns: List[str], queue: Queue = Queue(), value:Optional[List[str]]=None, score:Optional[float]=None):
         Thread.__init__(self)
         self._engine = engine
         self._train_patterns = train_patterns
         self._val_patterns = val_patterns
         self._q = queue
-        self._value: Optional[List[str]] = None
-        self._score: Optional[float] = None
+        self._value = value
+        self._score = score
 
     def run(self):
         regex_list = self._engine.get_regex_sequence(
@@ -28,7 +28,6 @@ class Candidate(Thread):
         self._score = f1
         self._q.put((f1, regex_list))
     
-
     @property
     def value(self) -> List[str]:
         value = self._value
@@ -102,12 +101,13 @@ class CandidateRecords:
         return self.candidates == other.candidates
     
     def __add__(self, other: 'CandidateRecords') -> 'CandidateRecords':
-        new_regex_candidates = [c1 + c2 for c1 in self.candidates for c2 in other.candidates]
-        val_buckets = [c1._val_patterns + c2._val_patterns for c1 in self._candidates for c2 in other._candidates]
-        new_candidates = []
-        for regex_list, val_patterns in zip(new_regex_candidates, val_buckets):
-            c = Candidate(self._candidates[0]._engine, [], val_patterns)
-            c._value = regex_list
+        new_candidates = [
+            Candidate(
+                None, 
+                c1._train_patterns + c2._train_patterns,
+                list(set(c1._val_patterns + c2._val_patterns)-set(c1._train_patterns + c2._train_patterns)),
+                value=c1._value + c2._value
+            ) for c1 in self._candidates for c2 in other._candidates]
+        for c in new_candidates:
             c._score = c.get_score()
-            new_candidates.append(c)
         return CandidateRecords(new_candidates, run=False)
