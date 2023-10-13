@@ -22,10 +22,6 @@ class Chain:
             prompt=self.new_inference_prompt,
             llm=self._openai_llm
         )
-        self.alter_regex = LLMChain(
-            prompt=self.alter_regex_prompt,
-            llm=self._openai_llm
-        )
         self.simplify_regex = LLMChain(
             prompt=self.simplify_regex_prompt,
             llm=self._openai_llm
@@ -59,27 +55,6 @@ The resulting regex is: """
         prompt = PromptTemplate(
             template=template,
             input_variables=['strings']
-        )
-        return prompt
-
-    @property
-    def alter_regex_prompt(self) -> PromptTemplate:
-        template = """Question: Alter the regex "{regex}" such that the following requirements is matched:
-*. The pattern fully match the regex still fully match the regex.
-*. The regex should full match as many strings provided as possible.
-*. The regex should be as short as possible.
-*. The regex should not match strings that is not provided except for those full match the original regex.
-Now, each instance of the strings is provided line-by-line and wrapped by double quotes as follows:
-{strings}
-
-Note that:
-1. The double quote is not part of the string instance. Ignore the double quote during inferencing the regex.
-2. Provide the resulting regex without wrapping it in quote
-
-The resulting altered regex is: """
-        prompt = PromptTemplate(
-            template=template,
-            input_variables=['regex', 'strings']
         )
         return prompt
 
