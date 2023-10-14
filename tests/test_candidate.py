@@ -29,8 +29,7 @@ def test_or():
     c3 = Candidate(Engine(), [], [])
     c3._value = 'c'
     c3._score = 0.7
-    records2 = CandidateRecords([c1, c3])
-    records2.sort()
+    records2 = sorted(CandidateRecords([c1, c3]))
     assert records.candidates == ['a', 'b']
     assert records2.candidates == ['b', 'c']
     assert (records2 | records).candidates == ['a', 'b', 'c']

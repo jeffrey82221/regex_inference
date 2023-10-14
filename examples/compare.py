@@ -33,7 +33,7 @@ if __name__ == '__main__':
 # Experiment 1: Compare performace & cost #
 ###########################################
 
-Data: version.txt 
+Data: version.txt
 
 AI approach:
 {'total_tokens': 7053, 'prompt_tokens': 6237, 'completion_tokens': 816, 'total_cost': 0.14106000000000002}
