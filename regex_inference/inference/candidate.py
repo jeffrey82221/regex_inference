@@ -24,6 +24,7 @@ class Candidate(Thread):
         self._value = value
         self._score = score
         self._openai_callback = None
+
     def run(self):
         with get_openai_callback() as cb:
             regex_list = self._engine.get_regex_sequence(
@@ -33,7 +34,7 @@ class Candidate(Thread):
             self._value = regex_list
             self._score = f1
             self._q.put((f1, regex_list))
-        self._openai_callback = cb        
+        self._openai_callback = cb
 
     @property
     def value(self) -> List[str]:
@@ -72,7 +73,7 @@ class CandidateRecords:
 
     def __init__(self, candidates: List[Candidate]):
         self._candidates = candidates
-        
+
     def run(self):
         self.do_inference()
         self.sort()
@@ -114,10 +115,9 @@ class CandidateRecords:
         if not isinstance(other, CandidateRecords):
             return NotImplemented
         return self.candidates == other.candidates
-    
+
     def __or__(self, other: 'CandidateRecords') -> 'CandidateRecords':
-        new_obj = CandidateRecords(self._candidates)
-        new_obj.sort()
+        new_obj = sorted(CandidateRecords(self._candidates))
         new_obj._candidates = list(
             set(new_obj._candidates) | set(other._candidates))
         worker_list = [(worker, worker.score)
@@ -140,8 +140,7 @@ class CandidateRecords:
             ) for c1 in self._candidates for c2 in other._candidates]
         for c in new_candidates:
             c._score = c.get_score()
-        result = CandidateRecords(new_candidates)
-        result.sort()
+        result = sorted(CandidateRecords(new_candidates))
         return result
 
     def sort_by_benefit(self, patterns: List[str]) -> List[str]:
@@ -161,7 +160,8 @@ class CandidateRecords:
         performances = Evaluator.get_performance_score(
             patterns, self.candidates)
         variations = Evaluator.get_variation_score(patterns, self.candidates)
-        interest_score = stats.zscore(np.array(variations)) - stats.zscore(np.array(performances))
+        interest_score = stats.zscore(
+            np.array(variations)) - stats.zscore(np.array(performances))
         results = list(map(
             lambda x: x[1],
             sorted(zip(interest_score, patterns),
@@ -170,10 +170,14 @@ class CandidateRecords:
         return results
 
     def get_openai_summary(self):
-        total_tokens = sum([c._openai_callback.total_tokens for c in self._candidates])
-        prompt_tokens = sum([c._openai_callback.prompt_tokens for c in self._candidates])
-        completion_tokens = sum([c._openai_callback.completion_tokens for c in self._candidates])
-        total_cost = sum([c._openai_callback.total_cost for c in self._candidates])
+        total_tokens = sum(
+            [c._openai_callback.total_tokens for c in self._candidates])
+        prompt_tokens = sum(
+            [c._openai_callback.prompt_tokens for c in self._candidates])
+        completion_tokens = sum(
+            [c._openai_callback.completion_tokens for c in self._candidates])
+        total_cost = sum(
+            [c._openai_callback.total_cost for c in self._candidates])
         return {
             'total_tokens': total_tokens,
             'prompt_tokens': prompt_tokens,

@@ -28,6 +28,7 @@ def do_experiment(train_patterns, eval_patterns, engine,
             train, val_patterns=val, n_fold=n_thread)
     precision, recall, f1 = Evaluator.evaluate(
         regex, eval_patterns)
+    print(inferencer.openai_summary)
     print('f1:', f1)
 
 

@@ -47,6 +47,7 @@ class Inference:
                 train_patterns, n_fold=n_fold, total_train_rate=train_rate * n_fold)
         candidate_records.run()
         regex = candidate_records.get_best()
+        self.openai_summary = candidate_records.get_openai_summary()
         return regex
 
     def _build_fix_valid_candidates(
