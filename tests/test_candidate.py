@@ -9,7 +9,8 @@ def test_drop_bad():
     c1._score = 0.8
     c2._value = 'a'
     c2._score = 1.0
-    records = CandidateRecords([c1, c2], run=False)
+    records = CandidateRecords([c1, c2])
+    records.sort()
     records.drop_bad(1)
     assert len(records.candidates) == 1
     assert len(records.scores) == 1
@@ -24,12 +25,14 @@ def test_or():
     c1._score = 0.8
     c2._value = 'a'
     c2._score = 1.0
-    records = CandidateRecords([c1, c2], run=False)
+    records = CandidateRecords([c1, c2])
+    records.sort()
     assert (records | records).candidates == records.candidates
     c3 = Candidate(Engine(), [], [])
     c3._value = 'c'
     c3._score = 0.7
-    records2 = CandidateRecords([c1, c3], run=False)
+    records2 = CandidateRecords([c1, c3])
+    records2.sort()
     assert records.candidates == ['a', 'b']
     assert records2.candidates == ['b', 'c']
     assert (records2 | records).candidates == ['a', 'b', 'c']
@@ -43,7 +46,7 @@ def test_get_best():
     c1._score = 0.8
     c2._value = 'a'
     c2._score = 1.0
-    assert CandidateRecords([c1, c2], run=False).get_best() == 'a'
+    assert CandidateRecords([c1, c2]).get_best() == 'a'
 
 
 def test_add():
@@ -51,8 +54,8 @@ def test_add():
     c2 = Candidate(Engine(), [], ['b'])
     c1._value = ['a']
     c2._value = ['b']
-    r1 = CandidateRecords([c1, c2], run=False)
-    r2 = CandidateRecords([c1, c2], run=False)
+    r1 = CandidateRecords([c1, c2])
+    r2 = CandidateRecords([c1, c2])
     assert (r1 + r2).candidates == [['a', 'b'],
                                     ['b', 'a'], ['a', 'a'], ['b', 'b']]
     assert (r1 + r2).scores[:2] == [1.0, 1.0]
@@ -63,5 +66,5 @@ def test_sort_by_benefit():
     c2 = Candidate(Engine(), [], ['a'])
     c1._value = ['a']
     c2._value = ['a', 'b']
-    r1 = CandidateRecords([c1, c2], run=False)
+    r1 = CandidateRecords([c1, c2])
     assert r1.sort_by_benefit(['a', 'b']) == ['b', 'a']

@@ -45,6 +45,7 @@ class Inference:
         else:
             candidate_records = self._build_cross_valid_candidates(
                 train_patterns, n_fold=n_fold, total_train_rate=train_rate * n_fold)
+        candidate_records.run()
         regex = candidate_records.get_best()
         return regex
 

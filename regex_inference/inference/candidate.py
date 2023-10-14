@@ -70,10 +70,20 @@ class CandidateRecords:
     Holder of regex candidates
     """
 
-    def __init__(self, candidates: List[Candidate], run=True):
+    def __init__(self, candidates: List[Candidate]):
         self._candidates = candidates
-        if run:
-            self._run_inference()
+        
+    def run(self):
+        self.do_inference()
+        self.sort()
+
+    def do_inference(self):
+        for worker in self._candidates:
+            worker.start()
+        for worker in self._candidates:
+            worker.join()
+
+    def sort(self):
         worker_list = [(worker, worker.get_score())
                        for worker in self._candidates]
         self._candidates = [
@@ -82,13 +92,8 @@ class CandidateRecords:
                 key=lambda x: x[1],
                 reverse=True)]
 
-    def _run_inference(self):
-        for worker in self._candidates:
-            worker.start()
-        for worker in self._candidates:
-            worker.join()
-
     def get_best(self) -> str:
+        self.sort()
         return Engine.merge_regex_sequence(self._candidates[0].value)
 
     @property
@@ -105,8 +110,14 @@ class CandidateRecords:
         retain_cnt = len(self._candidates) - n_drop
         self._candidates = self._candidates[:retain_cnt]
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, CandidateRecords):
+            return NotImplemented
+        return self.candidates == other.candidates
+    
     def __or__(self, other: 'CandidateRecords') -> 'CandidateRecords':
-        new_obj = CandidateRecords(self._candidates, run=False)
+        new_obj = CandidateRecords(self._candidates)
+        new_obj.sort()
         new_obj._candidates = list(
             set(new_obj._candidates) | set(other._candidates))
         worker_list = [(worker, worker.score)
@@ -117,11 +128,6 @@ class CandidateRecords:
                 key=lambda x: x[1],
                 reverse=True)]
         return new_obj
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, CandidateRecords):
-            return NotImplemented
-        return self.candidates == other.candidates
 
     def __add__(self, other):
         new_candidates = [
@@ -134,7 +140,9 @@ class CandidateRecords:
             ) for c1 in self._candidates for c2 in other._candidates]
         for c in new_candidates:
             c._score = c.get_score()
-        return CandidateRecords(new_candidates, run=False)
+        result = CandidateRecords(new_candidates)
+        result.sort()
+        return result
 
     def sort_by_benefit(self, patterns: List[str]) -> List[str]:
         """
