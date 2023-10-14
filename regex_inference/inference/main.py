@@ -40,15 +40,18 @@ class Inference:
             - regex: The infered regex
         """
         if val_patterns:
-            regex = self._infer_with_fix_val_patterns(
+            candidate_records = self._build_fix_valid_candidates(
                 train_patterns, val_patterns, n_fold=n_fold)
         else:
-            regex = self._infer_with_cross_val_patterns(
+            candidate_records = self._build_cross_valid_candidates(
                 train_patterns, n_fold=n_fold, total_train_rate=train_rate * n_fold)
+        candidate_records.run()
+        regex = candidate_records.get_best()
+        self.openai_summary = candidate_records.get_openai_summary()
         return regex
 
-    def _infer_with_fix_val_patterns(
-            self, train_patterns: List[str], val_patterns: List[str], n_fold: int) -> str:
+    def _build_fix_valid_candidates(
+            self, train_patterns: List[str], val_patterns: List[str], n_fold: int) -> CandidateRecords:
         candidates = []
         for _ in range(n_fold):
             candidate = Candidate(
@@ -56,10 +59,10 @@ class Inference:
                 train_patterns,
                 val_patterns)
             candidates.append(candidate)
-        return CandidateRecords(candidates).get_best()
+        return CandidateRecords(candidates)
 
-    def _infer_with_cross_val_patterns(
-            self, train_patterns: List[str], n_fold: int, total_train_rate: float) -> str:
+    def _build_cross_valid_candidates(
+            self, train_patterns: List[str], n_fold: int, total_train_rate: float) -> CandidateRecords:
         selected_train_count = int(len(train_patterns) * total_train_rate)
         train_buckets = Inference._get_train_buckets(
             train_patterns, selected_train_count, n_fold)
@@ -71,7 +74,7 @@ class Inference:
                 train_buckets[i],
                 val_bucket)
             candidates.append(candidate)
-        return CandidateRecords(candidates).get_best()
+        return CandidateRecords(candidates)
 
     @staticmethod
     def _get_train_buckets(

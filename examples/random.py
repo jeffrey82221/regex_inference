@@ -14,3 +14,4 @@ precision, recall, f1 = Evaluator.evaluate(
 print('precision:', precision)
 print('recall:', recall)
 print('f1:', f1)
+print(inference.openai_summary)

@@ -2,6 +2,7 @@ from typing import List, Optional
 from threading import Thread
 from scipy import stats
 import numpy as np
+from langchain.callbacks.manager import get_openai_callback
 # from multiprocessing import Process as Thread
 from multiprocessing import Queue
 from ..evaluator import Evaluator
@@ -22,15 +23,18 @@ class Candidate(Thread):
         self._q = queue
         self._value = value
         self._score = score
+        self._openai_callback = None
 
     def run(self):
-        regex_list = self._engine.get_regex_sequence(
-            self._train_patterns)
-        _, _, f1 = Evaluator.evaluate_regex_list(
-            regex_list, self._val_patterns)
-        self._value = regex_list
-        self._score = f1
-        self._q.put((f1, regex_list))
+        with get_openai_callback() as cb:
+            regex_list = self._engine.get_regex_sequence(
+                self._train_patterns)
+            _, _, f1 = Evaluator.evaluate_regex_list(
+                regex_list, self._val_patterns)
+            self._value = regex_list
+            self._score = f1
+            self._q.put((f1, regex_list))
+        self._openai_callback = cb
 
     @property
     def value(self) -> List[str]:
@@ -67,10 +71,20 @@ class CandidateRecords:
     Holder of regex candidates
     """
 
-    def __init__(self, candidates: List[Candidate], run=True):
+    def __init__(self, candidates: List[Candidate]):
         self._candidates = candidates
-        if run:
-            self._run_inference()
+
+    def run(self):
+        self.do_inference()
+        self.do_sort()
+
+    def do_inference(self):
+        for worker in self._candidates:
+            worker.start()
+        for worker in self._candidates:
+            worker.join()
+
+    def do_sort(self):
         worker_list = [(worker, worker.get_score())
                        for worker in self._candidates]
         self._candidates = [
@@ -79,13 +93,8 @@ class CandidateRecords:
                 key=lambda x: x[1],
                 reverse=True)]
 
-    def _run_inference(self):
-        for worker in self._candidates:
-            worker.start()
-        for worker in self._candidates:
-            worker.join()
-
     def get_best(self) -> str:
+        self.do_sort()
         return Engine.merge_regex_sequence(self._candidates[0].value)
 
     @property
@@ -102,8 +111,14 @@ class CandidateRecords:
         retain_cnt = len(self._candidates) - n_drop
         self._candidates = self._candidates[:retain_cnt]
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, CandidateRecords):
+            return NotImplemented
+        return self.candidates == other.candidates
+
     def __or__(self, other: 'CandidateRecords') -> 'CandidateRecords':
-        new_obj = CandidateRecords(self._candidates, run=False)
+        new_obj = CandidateRecords(self._candidates)
+        new_obj.do_sort()
         new_obj._candidates = list(
             set(new_obj._candidates) | set(other._candidates))
         worker_list = [(worker, worker.score)
@@ -114,11 +129,6 @@ class CandidateRecords:
                 key=lambda x: x[1],
                 reverse=True)]
         return new_obj
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, CandidateRecords):
-            return NotImplemented
-        return self.candidates == other.candidates
 
     def __add__(self, other):
         new_candidates = [
@@ -131,7 +141,9 @@ class CandidateRecords:
             ) for c1 in self._candidates for c2 in other._candidates]
         for c in new_candidates:
             c._score = c.get_score()
-        return CandidateRecords(new_candidates, run=False)
+        result = CandidateRecords(new_candidates)
+        result.do_sort()
+        return result
 
     def sort_by_benefit(self, patterns: List[str]) -> List[str]:
         """
@@ -150,10 +162,27 @@ class CandidateRecords:
         performances = Evaluator.get_performance_score(
             patterns, self.candidates)
         variations = Evaluator.get_variation_score(patterns, self.candidates)
-        interest_score = stats.zscore(np.array(variations)) - stats.zscore(np.array(performances))
+        interest_score = stats.zscore(
+            np.array(variations)) - stats.zscore(np.array(performances))
         results = list(map(
             lambda x: x[1],
             sorted(zip(interest_score, patterns),
                    reverse=True, key=lambda x: x[0])
         ))
         return results
+
+    def get_openai_summary(self):
+        total_tokens = sum(
+            [c._openai_callback.total_tokens for c in self._candidates])
+        prompt_tokens = sum(
+            [c._openai_callback.prompt_tokens for c in self._candidates])
+        completion_tokens = sum(
+            [c._openai_callback.completion_tokens for c in self._candidates])
+        total_cost = sum(
+            [c._openai_callback.total_cost for c in self._candidates])
+        return {
+            'total_tokens': total_tokens,
+            'prompt_tokens': prompt_tokens,
+            'completion_tokens': completion_tokens,
+            'total_cost': total_cost
+        }
