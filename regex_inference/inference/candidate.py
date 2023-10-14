@@ -84,7 +84,7 @@ class CandidateRecords:
         for worker in self._candidates:
             worker.join()
 
-    def sort(self):
+    def do_sort(self):
         worker_list = [(worker, worker.get_score())
                        for worker in self._candidates]
         self._candidates = [
@@ -94,7 +94,7 @@ class CandidateRecords:
                 reverse=True)]
 
     def get_best(self) -> str:
-        self.sort()
+        self.do_sort()
         return Engine.merge_regex_sequence(self._candidates[0].value)
 
     @property
@@ -117,7 +117,8 @@ class CandidateRecords:
         return self.candidates == other.candidates
 
     def __or__(self, other: 'CandidateRecords') -> 'CandidateRecords':
-        new_obj = sorted(CandidateRecords(self._candidates))
+        new_obj = CandidateRecords(self._candidates)
+        new_obj.do_sort()
         new_obj._candidates = list(
             set(new_obj._candidates) | set(other._candidates))
         worker_list = [(worker, worker.score)
@@ -140,7 +141,8 @@ class CandidateRecords:
             ) for c1 in self._candidates for c2 in other._candidates]
         for c in new_candidates:
             c._score = c.get_score()
-        result = sorted(CandidateRecords(new_candidates))
+        result = CandidateRecords(new_candidates)
+        result.do_sort()
         return result
 
     def sort_by_benefit(self, patterns: List[str]) -> List[str]:

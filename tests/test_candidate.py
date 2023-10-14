@@ -9,7 +9,8 @@ def test_drop_bad():
     c1._score = 0.8
     c2._value = 'a'
     c2._score = 1.0
-    records = sorted(CandidateRecords([c1, c2]))
+    records = CandidateRecords([c1, c2])
+    records.do_sort()
     records.drop_bad(1)
     assert len(records.candidates) == 1
     assert len(records.scores) == 1
@@ -24,12 +25,16 @@ def test_or():
     c1._score = 0.8
     c2._value = 'a'
     c2._score = 1.0
-    records = sorted(CandidateRecords([c1, c2]))
-    assert (records | records).candidates == records.candidates
+    records = CandidateRecords([c1, c2])
+    records.do_sort()
+    new_records = (records | records)
+    new_records.do_sort()
+    assert new_records.candidates == records.candidates
     c3 = Candidate(Engine(), [], [])
     c3._value = 'c'
     c3._score = 0.7
-    records2 = sorted(CandidateRecords([c1, c3]))
+    records2 = CandidateRecords([c1, c3])
+    records2.do_sort()
     assert records.candidates == ['a', 'b']
     assert records2.candidates == ['b', 'c']
     assert (records2 | records).candidates == ['a', 'b', 'c']
