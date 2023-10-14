@@ -1,6 +1,7 @@
 from regex_inference.inference.candidate import CandidateRecords, Candidate
 from regex_inference import Engine
 
+
 def test_drop_bad():
     c1 = Candidate(Engine(), [], [])
     c2 = Candidate(Engine(), [], [])
@@ -14,6 +15,7 @@ def test_drop_bad():
     assert len(records.scores) == 1
     assert records.candidates[0] == 'a'
     assert records.scores[0] == 1.0
+
 
 def test_or():
     c1 = Candidate(Engine(), [], [])
@@ -43,6 +45,7 @@ def test_get_best():
     c2._score = 1.0
     assert CandidateRecords([c1, c2], run=False).get_best() == 'a'
 
+
 def test_add():
     c1 = Candidate(Engine(), [], ['a'])
     c2 = Candidate(Engine(), [], ['b'])
@@ -50,5 +53,15 @@ def test_add():
     c2._value = ['b']
     r1 = CandidateRecords([c1, c2], run=False)
     r2 = CandidateRecords([c1, c2], run=False)
-    assert (r1 + r2).candidates == [['a', 'b'], ['b', 'a'], ['a', 'a'], ['b', 'b']]
+    assert (r1 + r2).candidates == [['a', 'b'],
+                                    ['b', 'a'], ['a', 'a'], ['b', 'b']]
     assert (r1 + r2).scores[:2] == [1.0, 1.0]
+
+
+def test_sort_by_benefit():
+    c1 = Candidate(Engine(), [], ['a'])
+    c2 = Candidate(Engine(), [], ['a'])
+    c1._value = ['a']
+    c2._value = ['a', 'b']
+    r1 = CandidateRecords([c1, c2], run=False)
+    assert r1.sort_by_benefit(['a', 'b']) == ['b', 'a']

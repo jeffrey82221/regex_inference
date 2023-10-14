@@ -6,7 +6,8 @@ from .fado import FAdoEngine, FAdoAIEngine
 from .candidate import Candidate, CandidateRecords
 
 __all__ = ['Inference']
-    
+
+
 class Inference:
     def __init__(self, *args, **kwargs):
         if 'engine' in kwargs:
