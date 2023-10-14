@@ -76,7 +76,7 @@ class CandidateRecords:
 
     def run(self):
         self.do_inference()
-        self.sort()
+        self.do_sort()
 
     def do_inference(self):
         for worker in self._candidates:

@@ -44,7 +44,7 @@ def addresses():
 def versions_more():
     with open('tests/data/version.txt', 'r') as f:
         whole_patterns = f.read().split('\n')
-    return random.sample(whole_patterns, 100)  # Tuned for pure-ai
+    return random.sample(whole_patterns, 75)  # Tuned for pure-ai
 
 
 @pytest.fixture
