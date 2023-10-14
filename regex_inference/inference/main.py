@@ -1,49 +1,11 @@
-from typing import List, Tuple
-from threading import Thread
-# from multiprocessing import Process as Thread
-from multiprocessing import Queue
+from typing import List
 from more_itertools import chunked
 import random
 from .engine import Engine
 from .fado import FAdoEngine, FAdoAIEngine
-from ..evaluator import Evaluator
+from .candidate import Candidate, CandidateRecords
 
 __all__ = ['Inference']
-
-
-class Candidate(Thread):
-    def __init__(self, engine, train_patterns, val_patterns, queue):
-        Thread.__init__(self)
-        self.value = None
-        self._engine = engine
-        self._train_patterns = train_patterns
-        self._val_patterns = val_patterns
-        self._q = queue
-
-    def run(self):
-        regex_list = self._engine.get_regex_sequence(
-            self._train_patterns)
-        _, _, f1 = Evaluator.evaluate_regex_list(
-            regex_list, self._val_patterns)
-        self.value = (f1, regex_list)
-        self._q.put((f1, regex_list))
-
-    @staticmethod
-    def get_best(candidates: List['Candidate']) -> str:
-        for worker in candidates:
-            worker.start()
-        for worker in candidates:
-            worker.join()
-        regex_list = [Candidate.get_value(worker) for worker in candidates]
-        sorted_results = sorted(regex_list, key=lambda x: x[0], reverse=True)
-        return Engine.merge_regex_sequence(sorted_results[0][1])
-
-    @staticmethod
-    def get_value(candidate) -> Tuple[float, List[str]]:
-        value = candidate.value
-        if value is None:
-            value = candidate._q.get()
-        return value
 
 
 class Inference:
@@ -92,10 +54,9 @@ class Inference:
             candidate = Candidate(
                 self._engine,
                 train_patterns,
-                val_patterns,
-                Queue())
+                val_patterns)
             candidates.append(candidate)
-        return Candidate.get_best(candidates)
+        return CandidateRecords(candidates).get_best()
 
     def _infer_with_cross_val_patterns(
             self, train_patterns: List[str], n_fold: int, total_train_rate: float) -> str:
@@ -108,10 +69,9 @@ class Inference:
             candidate = Candidate(
                 self._engine,
                 train_buckets[i],
-                val_bucket,
-                Queue())
+                val_bucket)
             candidates.append(candidate)
-        return Candidate.get_best(candidates)
+        return CandidateRecords(candidates).get_best()
 
     @staticmethod
     def _get_train_buckets(

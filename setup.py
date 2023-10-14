@@ -53,13 +53,15 @@ setuptools.setup(
     python_requires='>=3.8, !=3.11.*',
     tests_require=['pytest'],
     install_requires=[
-        'openapi-schema-pydantic==1.2.4',
         'pydantic==1.10.12',
+        'more_itertools==8.14.0',
+        'numpy==1.22.4',
+        'scipy==1.8.1',
+        'openapi-schema-pydantic==1.2.4',
         'openai==0.27.8',
         'langchain==0.0.253',
         'random_regex',
         'RegexFactory==1.0.0',
-        'fado==2.0.4',
-        'more_itertools==8.14.0'
+        'fado==2.0.4'
     ]
 )

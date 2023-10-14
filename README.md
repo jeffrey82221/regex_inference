@@ -2,7 +2,7 @@
 
 Welcome to regex_inference!
 
-regex_inference is a Python package dedicated to making regular expression (regex) inference a breeze. With the power of the ChatGPT model, this package can effortlessly derive regex patterns from a list of strings you provide. 
+This is a Python package dedicated to making regular expression (regex) inference a breeze. With the power of the ChatGPT model, this package can effortlessly derive regex patterns from a list of strings you provide. 
 
 Here are some of the cool features you can expect:
 

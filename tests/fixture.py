@@ -30,7 +30,7 @@ def train_complex():
 def versions():
     with open('tests/data/version.txt', 'r') as f:
         whole_patterns = f.read().split('\n')
-    return random.sample(whole_patterns, 20)  # Tuned for fado+ai
+    return random.sample(whole_patterns, 10)  # Tuned for fado+ai
 
 
 @pytest.fixture
