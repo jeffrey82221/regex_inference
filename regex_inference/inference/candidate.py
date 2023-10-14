@@ -1,6 +1,7 @@
 from typing import List, Optional
 from threading import Thread
 from scipy import stats
+import numpy as np
 # from multiprocessing import Process as Thread
 from multiprocessing import Queue
 from ..evaluator import Evaluator
@@ -114,10 +115,12 @@ class CandidateRecords:
                 reverse=True)]
         return new_obj
 
-    def __eq__(self, other: 'CandidateRecords') -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, CandidateRecords):
+            return NotImplemented
         return self.candidates == other.candidates
 
-    def __add__(self, other: 'CandidateRecords') -> 'CandidateRecords':
+    def __add__(self, other):
         new_candidates = [
             Candidate(
                 None,
@@ -147,8 +150,8 @@ class CandidateRecords:
         performances = Evaluator.get_performance_score(
             patterns, self.candidates)
         variations = Evaluator.get_variation_score(patterns, self.candidates)
-        performances = stats.zscore(performances)
-        variations = stats.zscore(variations)
+        performances = stats.zscore(np.array(performances))
+        variations = stats.zscore(np.array(variations))
         interest_score = variations - performances
         results = list(map(
             lambda x: x[1],
