@@ -85,7 +85,7 @@ class CandidateRecords:
         for worker in self._candidates:
             worker.join()
 
-    def get_best(self) -> List[str]:
+    def get_best(self) -> str:
         return Engine.merge_regex_sequence(self._candidates[0].value)
 
     @property
@@ -150,9 +150,7 @@ class CandidateRecords:
         performances = Evaluator.get_performance_score(
             patterns, self.candidates)
         variations = Evaluator.get_variation_score(patterns, self.candidates)
-        performances = stats.zscore(np.array(performances))
-        variations = stats.zscore(np.array(variations))
-        interest_score = variations - performances
+        interest_score = stats.zscore(np.array(variations)) - stats.zscore(np.array(performances))
         results = list(map(
             lambda x: x[1],
             sorted(zip(interest_score, patterns),
